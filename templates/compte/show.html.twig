@@ -1,0 +1,54 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Compte{% endblock %}
+
+{% block body %}
+    <h1>Compte</h1>
+
+    <table class="table">
+        <tbody>
+            <tr>
+                <th>Id</th>
+                <td>{{ compte.id }}</td>
+            </tr>
+            <tr>
+                <th>Id_photo</th>
+                <td>{{ compte.idPhoto }}</td>
+            </tr>
+            <tr>
+                <th>Id_etablissement</th>
+                <td>{{ compte.idEtablissement }}</td>
+            </tr>
+            <tr>
+                <th>Pseudo</th>
+                <td>{{ compte.pseudo }}</td>
+            </tr>
+            <tr>
+                <th>Nom_affichage</th>
+                <td>{{ compte.nomAffichage }}</td>
+            </tr>
+            <tr>
+                <th>Email</th>
+                <td>{{ compte.email }}</td>
+            </tr>
+            <tr>
+                <th>Mdp</th>
+                <td>{{ compte.mdp }}</td>
+            </tr>
+            <tr>
+                <th>Biographie</th>
+                <td>{{ compte.biographie }}</td>
+            </tr>
+            <tr>
+                <th>Dernier_golden_like</th>
+                <td>{{ compte.dernierGoldenLike ? compte.dernierGoldenLike|date('Y-m-d') : '' }}</td>
+            </tr>
+        </tbody>
+    </table>
+
+    <a href="{{ path('app_compte_index') }}">back to list</a>
+
+    <a href="{{ path('app_compte_edit', {'id': compte.id}) }}">edit</a>
+
+    {{ include('compte/_delete_form.html.twig') }}
+{% endblock %}
