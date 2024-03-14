@@ -2,19 +2,19 @@
 
 namespace App\Entity;
 
-use App\Repository\HashtagRepository;
+use App\Repository\FormatRepository;
 use Doctrine\ORM\Mapping as ORM;
 
-#[ORM\Entity(repositoryClass: HashtagRepository::class)]
-class Hashtag
+#[ORM\Entity(repositoryClass: FormatRepository::class)]
+class Format
 {
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
     private ?int $id = null;
 
-    #[ORM\Column(length: 25)]
-    private ?string $texte = null;
+    #[ORM\Column(length: 3)]
+    private ?string $nom = null;
 
     public function getId(): ?int
     {
@@ -28,14 +28,14 @@ class Hashtag
         return $this;
     }
 
-    public function getTexte(): ?string
+    public function getNom(): ?string
     {
-        return $this->texte;
+        return $this->nom;
     }
 
-    public function setTexte(string $texte): static
+    public function setNom(string $nom): static
     {
-        $this->texte = $texte;
+        $this->nom = $nom;
 
         return $this;
     }

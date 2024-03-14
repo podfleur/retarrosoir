@@ -13,67 +13,68 @@ class Abonnement
     #[ORM\Column]
     private ?int $id = null;
 
-    #[ORM\Column]
-    private ?int $id_suiveur = null;
+    #[ORM\ManyToOne]
+    #[ORM\JoinColumn(nullable: false)]
+    private ?compte $suiveur_id = null;
 
-    #[ORM\Column(nullable: true)]
-    private ?int $id_suivi_personne = null;
+    #[ORM\ManyToOne(inversedBy: 'abonnements')]
+    private ?Compte $suivi_personne_id = null;
 
-    #[ORM\Column(nullable: true)]
-    private ?int $id_suivi_etablissement = null;
+    #[ORM\ManyToOne]
+    private ?Etablissement $suivi_etablissement_id = null;
 
-    #[ORM\Column(nullable: true)]
-    private ?int $id_suivi_hashtag = null;
+    #[ORM\ManyToOne]
+    private ?Hashtag $suivi_hashtag_id = null;
 
     public function getId(): ?int
     {
         return $this->id;
     }
 
-    public function getIdSuiveur(): ?int
+    public function getSuiveurId(): ?compte
     {
-        return $this->id_suiveur;
+        return $this->suiveur_id;
     }
 
-    public function setIdSuiveur(int $id_suiveur): static
+    public function setSuiveurId(?compte $suiveur_id): static
     {
-        $this->id_suiveur = $id_suiveur;
+        $this->suiveur_id = $suiveur_id;
 
         return $this;
     }
 
-    public function getIdSuiviPersonne(): ?int
+    public function getSuiviPersonneId(): ?Compte
     {
-        return $this->id_suivi_personne;
+        return $this->suivi_personne_id;
     }
 
-    public function setIdSuiviPersonne(?int $id_suivi_personne): static
+    public function setSuiviPersonneId(?Compte $suivi_personne_id): static
     {
-        $this->id_suivi_personne = $id_suivi_personne;
+        $this->suivi_personne_id = $suivi_personne_id;
 
         return $this;
     }
 
-    public function getIdSuiviEtablissement(): ?int
+    public function getSuiviEtablissementId(): ?Etablissement
     {
-        return $this->id_suivi_etablissement;
+        return $this->suivi_etablissement_id;
     }
 
-    public function setIdSuiviEtablissement(?int $id_suivi_etablissement): static
+    public function setSuiviEtablissementId(?Etablissement $suivi_etablissement_id): static
     {
-        $this->id_suivi_etablissement = $id_suivi_etablissement;
+        $this->suivi_etablissement_id = $suivi_etablissement_id;
 
         return $this;
     }
 
-    public function getIdSuiviHashtag(): ?int
+    public function getSuiviHashtagId(): ?Hashtag
     {
-        return $this->id_suivi_hashtag;
+        return $this->suivi_hashtag_id;
     }
 
-    public function setIdSuiviHashtag(?int $id_suivi_hashtag): static
+    public function setSuiviHashtagId(?Hashtag $suivi_hashtag_id): static
     {
-        $this->id_suivi_hashtag = $id_suivi_hashtag;
+        $this->suivi_hashtag_id = $suivi_hashtag_id;
 
         return $this;
     }

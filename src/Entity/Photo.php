@@ -14,11 +14,12 @@ class Photo
     #[ORM\Column]
     private ?int $id = null;
 
-    #[ORM\Column]
-    private ?int $id_post = null;
-
     #[ORM\Column(type: Types::BINARY)]
-    private $code_photo = null;
+    private $donnees_photo = null;
+
+    #[ORM\ManyToOne]
+    #[ORM\JoinColumn(nullable: false)]
+    private ?Format $format_id = null;
 
     public function getId(): ?int
     {
@@ -32,26 +33,26 @@ class Photo
         return $this;
     }
 
-    public function getIdPost(): ?int
+    public function getDonneesPhoto()
     {
-        return $this->id_post;
+        return $this->donnees_photo;
     }
 
-    public function setIdPost(int $id_post): static
+    public function setDonneesPhoto($donnees_photo): static
     {
-        $this->id_post = $id_post;
+        $this->donnees_photo = $donnees_photo;
 
         return $this;
     }
 
-    public function getCodePhoto()
+    public function getFormatId(): ?Format
     {
-        return $this->code_photo;
+        return $this->format_id;
     }
 
-    public function setCodePhoto($code_photo): static
+    public function setFormatId(?Format $format_id): static
     {
-        $this->code_photo = $code_photo;
+        $this->format_id = $format_id;
 
         return $this;
     }
