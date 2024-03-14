@@ -13,17 +13,18 @@ class Signalement
     #[ORM\Column]
     private ?int $id = null;
 
-    #[ORM\Column]
-    private ?int $id_signaleur = null;
-
-    #[ORM\Column(nullable: true)]
-    private ?int $id_post = null;
-
-    #[ORM\Column(nullable: true)]
-    private ?int $id_signale = null;
-
     #[ORM\Column(length: 150)]
     private ?string $motif = null;
+
+    #[ORM\ManyToOne]
+    #[ORM\JoinColumn(nullable: false)]
+    private ?Compte $signaleur_id = null;
+
+    #[ORM\ManyToOne]
+    private ?Compte $signale_id = null;
+
+    #[ORM\ManyToOne]
+    private ?Post $post_id = null;
 
     public function getId(): ?int
     {
@@ -37,42 +38,6 @@ class Signalement
         return $this;
     }
 
-    public function getIdSignaleur(): ?int
-    {
-        return $this->id_signaleur;
-    }
-
-    public function setIdSignaleur(int $id_signaleur): static
-    {
-        $this->id_signaleur = $id_signaleur;
-
-        return $this;
-    }
-
-    public function getIdPost(): ?int
-    {
-        return $this->id_post;
-    }
-
-    public function setIdPost(?int $id_post): static
-    {
-        $this->id_post = $id_post;
-
-        return $this;
-    }
-
-    public function getIdSignale(): ?int
-    {
-        return $this->id_signale;
-    }
-
-    public function setIdSignale(?int $id_signale): static
-    {
-        $this->id_signale = $id_signale;
-
-        return $this;
-    }
-
     public function getMotif(): ?string
     {
         return $this->motif;
@@ -81,6 +46,42 @@ class Signalement
     public function setMotif(string $motif): static
     {
         $this->motif = $motif;
+
+        return $this;
+    }
+
+    public function getSignaleurId(): ?Compte
+    {
+        return $this->signaleur_id;
+    }
+
+    public function setSignaleurId(?Compte $signaleur_id): static
+    {
+        $this->signaleur_id = $signaleur_id;
+
+        return $this;
+    }
+
+    public function getSignaleId(): ?Compte
+    {
+        return $this->signale_id;
+    }
+
+    public function setSignaleId(?Compte $signale_id): static
+    {
+        $this->signale_id = $signale_id;
+
+        return $this;
+    }
+
+    public function getPostId(): ?Post
+    {
+        return $this->post_id;
+    }
+
+    public function setPostId(?Post $post_id): static
+    {
+        $this->post_id = $post_id;
 
         return $this;
     }

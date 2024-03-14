@@ -15,13 +15,15 @@ class Like
     private ?int $id = null;
 
     #[ORM\Column]
-    private ?int $id_post = null;
-
-    #[ORM\Column]
-    private ?int $id_compte = null;
-
-    #[ORM\Column(nullable: true)]
     private ?bool $golden = null;
+
+    #[ORM\ManyToOne]
+    #[ORM\JoinColumn(nullable: false)]
+    private ?Post $post_id = null;
+
+    #[ORM\ManyToOne]
+    #[ORM\JoinColumn(nullable: false)]
+    private ?Compte $compte_id = null;
 
     public function getId(): ?int
     {
@@ -35,38 +37,38 @@ class Like
         return $this;
     }
 
-    public function getIdPost(): ?int
-    {
-        return $this->id_post;
-    }
-
-    public function setIdPost(int $id_post): static
-    {
-        $this->id_post = $id_post;
-
-        return $this;
-    }
-
-    public function getIdCompte(): ?int
-    {
-        return $this->id_compte;
-    }
-
-    public function setIdCompte(int $id_compte): static
-    {
-        $this->id_compte = $id_compte;
-
-        return $this;
-    }
-
     public function isGolden(): ?bool
     {
         return $this->golden;
     }
 
-    public function setGolden(?bool $golden): static
+    public function setGolden(bool $golden): static
     {
         $this->golden = $golden;
+
+        return $this;
+    }
+
+    public function getPostId(): ?Post
+    {
+        return $this->post_id;
+    }
+
+    public function setPostId(?Post $post_id): static
+    {
+        $this->post_id = $post_id;
+
+        return $this;
+    }
+
+    public function getCompteId(): ?Compte
+    {
+        return $this->compte_id;
+    }
+
+    public function setCompteId(?Compte $compte_id): static
+    {
+        $this->compte_id = $compte_id;
 
         return $this;
     }
