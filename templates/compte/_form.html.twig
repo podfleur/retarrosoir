@@ -1,4 +1,7 @@
 {{ form_start(form) }}
     {{ form_widget(form) }}
-    <button class="btn">{{ button_label|default('Save') }}</button>
+    <button class="btn btn-dark">{{ button_label|default('Save') }}</button>
+    <div>
+        <span>Déjà un compte ? <a href="{{ path('app_login') }}">Se connecter</a></span>
+    </div>
 {{ form_end(form) }}

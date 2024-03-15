@@ -8,20 +8,8 @@
     <table class="table">
         <tbody>
             <tr>
-                <th>Id</th>
-                <td>{{ compte.id }}</td>
-            </tr>
-            <tr>
-                <th>Id_photo</th>
-                <td>{{ compte.photo_id }}</td>
-            </tr>
-            <tr>
-                <th>Id_etablissement</th>
-                <td>{{ compte.idEtablissement }}</td>
-            </tr>
-            <tr>
                 <th>Pseudo</th>
-                <td>{{ compte.pseudo }}</td>
+                <td>{{ compte.username }}</td>
             </tr>
             <tr>
                 <th>Nom_affichage</th>
@@ -32,16 +20,12 @@
                 <td>{{ compte.email }}</td>
             </tr>
             <tr>
-                <th>Mdp</th>
-                <td>{{ compte.mdp }}</td>
-            </tr>
-            <tr>
                 <th>Biographie</th>
                 <td>{{ compte.biographie }}</td>
             </tr>
             <tr>
                 <th>Dernier_golden_like</th>
-                <td>{{ compte.dernierGoldenLike ? compte.dernierGoldenLike|date('Y-m-d') : '' }}</td>
+                <td>{{ compte.dernierGolddenLike ? compte.dernierGolddenLike|date('Y-m-d') : '' }}</td>
             </tr>
         </tbody>
     </table>

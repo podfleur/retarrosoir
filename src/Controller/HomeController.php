@@ -18,10 +18,12 @@ class HomeController extends AbstractController
 
         $this->denyAccessUnlessGranted('ROLE_USER');
 
-        
+        // Je veux renvoyer le compte de l'utilisateur connecté
+        $compte = $this->getUser();
 
         return $this->render('home/index.html.twig', [
             'controller_name' => 'HomeController',
+            // 'compte' => $compte
         ]);
     }
 }
