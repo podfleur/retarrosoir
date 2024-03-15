@@ -14,32 +14,36 @@
         </div>
     {% endif %}
 
-    <div class="container d-flex flex-column  w-full">
+    <div class="container d-flex flex-column">
 
-        <h1 class="h3 font-weight-normal">Connectez-vous à retarrosoir</h1>
+        <div class="card w-50 p-5 mx-auto my-5">
 
-        <form>
+            <h1 class="h3 font-weight-normal">Connectez-vous à retarrosoir</h1>
 
-            <div class="mb-3">
-                <label for="inputUsername" class="form-label">Nom d'utilisateur : </label>
-                <input type="text" value="{{ last_username }}" name="username" id="inputUsername" class="form-control" autocomplete="username" required autofocus>
-            </div>
-            
-            <div class="mb-3">
-                <label for="inputEmail" class="form-label">Mot de Passe : </label>
-                <input type="password" name="password" id="inputEmail" class="form-control" autocomplete="password" required>
-            </div>
-            <input type="hidden" name="_csrf_token"
-                value="{{ csrf_token('authenticate') }}"
-            >
+            <form>
 
-            <button class="btn btn-dark" type="submit">
-                Se Connecter
-            </button>
+                <div class="mb-3">
+                    <label for="inputUsername" class="form-label">Nom d'utilisateur : </label>
+                    <input type="text" value="{{ last_username }}" name="username" id="inputUsername" class="form-control" autocomplete="username" required autofocus>
+                </div>
+                
+                <div class="mb-3">
+                    <label for="inputEmail" class="form-label">Mot de Passe : </label>
+                    <input type="password" name="password" id="inputEmail" class="form-control" autocomplete="password" required>
+                </div>
+                <input type="hidden" name="_csrf_token"
+                    value="{{ csrf_token('authenticate') }}"
+                >
 
-        </form>
+                <button class="btn btn-dark" type="submit">
+                    Se Connecter
+                </button>
 
-        <span>Vous n'avez pas encore de compte ? <a href="{{ path('app_compte_new') }}">Inscrivez-vous</a></span>
+            </form>
+
+            <span class="mt-2">Vous n'avez pas encore de compte ? <a href="{{ path('app_compte_new') }}">Inscrivez-vous</a></span>
+
+        </div>
 
     </div>
 </form>

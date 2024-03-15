@@ -39,7 +39,7 @@ class CompteController extends AbstractController
             $entityManager->persist($compte);
             $entityManager->flush();
 
-            return $this->redirectToRoute('app_compte_index', [], Response::HTTP_SEE_OTHER);
+            return $this->redirectToRoute('app_home', [], Response::HTTP_SEE_OTHER);
         }
 
         return $this->render('compte/new.html.twig', [

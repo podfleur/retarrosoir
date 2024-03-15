@@ -3,36 +3,38 @@
 {% block title %}Compte{% endblock %}
 
 {% block body %}
-    <h1>Compte</h1>
+    <div class="container mt-5">
 
-    <table class="table">
-        <tbody>
-            <tr>
-                <th>Pseudo</th>
-                <td>{{ compte.username }}</td>
-            </tr>
-            <tr>
-                <th>Nom_affichage</th>
-                <td>{{ compte.nomAffichage }}</td>
-            </tr>
-            <tr>
-                <th>Email</th>
-                <td>{{ compte.email }}</td>
-            </tr>
-            <tr>
-                <th>Biographie</th>
-                <td>{{ compte.biographie }}</td>
-            </tr>
-            <tr>
-                <th>Dernier_golden_like</th>
-                <td>{{ compte.dernierGolddenLike ? compte.dernierGolddenLike|date('Y-m-d') : '' }}</td>
-            </tr>
-        </tbody>
-    </table>
+        <div class="w-full d-flex items-center justify-center">
+            <div class="flex items-center justify-center w-25">
+                <div class="h-24 w-24 bg-secondary"></div>
+            </div>
 
-    <a href="{{ path('app_compte_index') }}">back to list</a>
+            <div class="flex items-center justify-center w-75">
+                <h2>{{ compte.nomAffichage }}</h2>
+                
+                <div class="d-flex justify-between items-center w-full">
+                    <h4>{{ compte.username }}</h4>
+                    <div class="flex items-center justify-center">
+                        <a href="{{ path('app_compte_edit', {'id': compte.id}) }}" class="btn btn-sm me-3"><i class="fa-solid fa-gear"></i></a>
+                    </div>
+                </div>
 
-    <a href="{{ path('app_compte_edit', {'id': compte.id}) }}">edit</a>
+                {# Mettre la biographie #}
+                <p>{{ compte.biographie }}</p>
 
-    {{ include('compte/_delete_form.html.twig') }}
+                <div class="flex items-center justify-center">
+                    <a href="{{ path('app_home') }}" class="btn btn-sm btn-secondary">Accueil</a>
+                </div>
+            </div>
+        </div>
+
+        <hr>
+
+        <h3 class="text-center">Publications</h3>
+
+        <h6 class="text-center text-secondary font-weight-light">Aucune publication pour le moment.</h6>
+        
+    </div>
+
 {% endblock %}
