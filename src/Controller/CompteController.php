@@ -10,6 +10,7 @@ use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
+use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 
 #[Route('/compte')]
 class CompteController extends AbstractController
@@ -23,13 +24,18 @@ class CompteController extends AbstractController
     }
 
     #[Route('/new', name: 'app_compte_new', methods: ['GET', 'POST'])]
-    public function new(Request $request, EntityManagerInterface $entityManager): Response
+    public function new(Request $request, EntityManagerInterface $entityManager, UserPasswordHasherInterface $hasher): Response
     {
         $compte = new Compte();
-        $form = $this->createForm(CompteType::class, $compte);
+        $form = $this->createForm(CompteType::class, $compte); 
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
+
+            $compte->setUsername($compte->getEmail());
+            $compte->setPassword($hasher->hashPassword($compte, $compte->getPassword()));
+            $compte->setRoles(['ROLE_USER']);
+
             $entityManager->persist($compte);
             $entityManager->flush();
 

@@ -23,23 +23,19 @@ class CompteType extends AbstractType
             // ->add('id_etablissement', TextType::class, [
             //     'attr' => ['class' => 'form-control']
             // ])
-            // ->add('pseudo', TextType::class, [
-            //     'attr' => ['class' => 'form-control']
-            // ])
+            ->add('username', TextType::class, [
+                'attr' => ['class' => 'form-control']
+            ])
             // ->add('nom_affichage', TextType::class, [
             //     'attr' => ['class' => 'form-control']
             // ])
             ->add('email', EmailType::class, [
                 'attr' => ['class' => 'form-control']
             ])
-            ->add('mdp', PasswordType::class, [
+            ->add('password', PasswordType::class, [
                 'attr' => ['class' => 'form-control']
             ])
             ->add('biographie', TextareaType::class, [
-                'attr' => ['class' => 'form-control']
-            ])
-            ->add('dernier_golden_like', DateTimeType::class, [
-                'widget' => 'single_text',
                 'attr' => ['class' => 'form-control']
             ]);
     }

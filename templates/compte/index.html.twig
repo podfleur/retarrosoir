@@ -24,14 +24,14 @@
         {% for compte in comptes %}
             <tr>
                 <td>{{ compte.id }}</td>
-                <td>{{ compte.idPhoto }}</td>
-                <td>{{ compte.idEtablissement }}</td>
-                <td>{{ compte.pseudo }}</td>
+                <td>{{ compte.photoId }}</td>
+                <td>{{ compte.etablissementId }}</td>
+                <td>{{ compte.username }}</td>
                 <td>{{ compte.nomAffichage }}</td>
                 <td>{{ compte.email }}</td>
-                <td>{{ compte.mdp }}</td>
+                <td>{{ compte.password }}</td>
                 <td>{{ compte.biographie }}</td>
-                <td>{{ compte.dernierGoldenLike ? compte.dernierGoldenLike|date('Y-m-d') : '' }}</td>
+                <td>{{ compte.dernierGolddenLike ? compte.dernierGolddenLike|date('Y-m-d') : '' }}</td>
                 <td>
                     <a href="{{ path('app_compte_show', {'id': compte.id}) }}">show</a>
                     <a href="{{ path('app_compte_edit', {'id': compte.id}) }}">edit</a>
