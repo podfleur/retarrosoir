@@ -16,7 +16,7 @@ class PostType extends AbstractType
             ->add('titre')
             ->add('description')
             ->add('date')
-            ->add('temps_retard')g
+            ->add('temps_retard')
         ;
     }
 
