@@ -5,119 +5,140 @@ namespace App\Entity;
 use App\Repository\CompteRepository;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface;
+use Symfony\Component\Security\Core\User\UserInterface;
 
 #[ORM\Entity(repositoryClass: CompteRepository::class)]
-class Compte
+class Compte implements UserInterface, PasswordAuthenticatedUserInterface
 {
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
     private ?int $id = null;
 
-    #[ORM\Column(nullable: true)]
-    private ?int $id_photo = null;
+    #[ORM\Column(length: 180, unique: true)]
+    private ?string $username = null;
 
-    #[ORM\Column(nullable: true)]
-    private ?int $id_etablissement = null;
+    #[ORM\Column]
+    private array $roles = [];
 
-    #[ORM\Column(length: 20)]
-    private ?string $pseudo = null;
+    /**
+     * @var string The hashed password
+     */
+    #[ORM\Column]
+    private ?string $password = null;
 
-    #[ORM\Column(length: 20, nullable: true)]
-    private ?string $nom_affichage = null;
+    #[ORM\ManyToOne]
+    private ?Photo $photo_id = null;
 
-    #[ORM\Column(length: 60)]
-    private ?string $email = null;
+    #[ORM\ManyToOne]
+    private ?Etablissement $etablissement_id = null;
 
-    #[ORM\Column(length: 40)]
-    private ?string $mdp = null;
-
-    #[ORM\Column(length: 150, nullable: true)]
+    #[ORM\Column(length: 255, nullable: true)]
     private ?string $biographie = null;
 
-    #[ORM\Column(type: Types::DATE_MUTABLE, nullable: true)]
-    private ?\DateTimeInterface $dernier_golden_like = null;
+    #[ORM\Column(type: Types::DATETIME_MUTABLE, nullable: true)]
+    private ?\DateTimeInterface $dernier_goldden_like = null;
+
+    #[ORM\Column(length: 255)]
+    private ?string $email = null;
+
+    #[ORM\Column(length: 30, nullable: true)]
+    private ?string $nom_affichage = null;
+
+    #[ORM\Column]
+    private ?bool $suspendu = null;
 
     public function getId(): ?int
     {
         return $this->id;
     }
 
-    public function setId(int $id): static
+    public function getUsername(): ?string
     {
-        $this->id = $id;
+        return $this->username;
+    }
+
+    public function setUsername(string $username): static
+    {
+        $this->username = $username;
 
         return $this;
     }
 
-    public function getPhotoId(): ?int
+    /**
+     * A visual identifier that represents this user.
+     *
+     * @see UserInterface
+     */
+    public function getUserIdentifier(): string
     {
-        return $this->id_photo;
+        return (string) $this->username;
     }
 
-    public function setPhotoId(?int $id_photo): static
+    /**
+     * @see UserInterface
+     */
+    public function getRoles(): array
     {
-        $this->id_photo = $id_photo;
+        $roles = $this->roles;
+        // guarantee every user at least has ROLE_USER
+        $roles[] = 'ROLE_USER';
+
+        return array_unique($roles);
+    }
+
+    public function setRoles(array $roles): static
+    {
+        $this->roles = $roles;
 
         return $this;
     }
 
-    public function getEtablissementId(): ?int
+    /**
+     * @see PasswordAuthenticatedUserInterface
+     */
+    public function getPassword(): string
     {
-        return $this->id_etablissement;
+        return $this->password;
     }
 
-    public function setEtablissementId(?int $id_etablissement): static
+    public function setPassword(string $password): static
     {
-        $this->id_etablissement = $id_etablissement;
+        $this->password = $password;
 
         return $this;
     }
 
-    public function getPseudo(): ?string
+    /**
+     * @see UserInterface
+     */
+    public function eraseCredentials(): void
     {
-        return $this->pseudo;
+        // If you store any temporary, sensitive data on the user, clear it here
+        // $this->plainPassword = null;
     }
 
-    public function setPseudo(string $pseudo): static
+    public function getPhotoId(): ?Photo
     {
-        $this->pseudo = $pseudo;
+        return $this->photo_id;
+    }
+
+    public function setPhotoId(?Photo $photo_id): static
+    {
+        $this->photo_id = $photo_id;
 
         return $this;
     }
 
-    public function getNomAffichage(): ?string
+    public function getEtablissementId(): ?Etablissement
     {
-        return $this->nom_affichage;
+        return $this->etablissement_id;
     }
 
-    public function setNomAffichage(?string $nom_affichage): static
+    public function setEtablissementId(?Etablissement $etablissement_id): static
     {
-        $this->nom_affichage = $nom_affichage;
-
-        return $this;
-    }
-
-    public function getEmail(): ?string
-    {
-        return $this->email;
-    }
-
-    public function setEmail(string $email): static
-    {
-        $this->email = $email;
-
-        return $this;
-    }
-
-    public function getMdp(): ?string
-    {
-        return $this->mdp;
-    }
-
-    public function setMdp(string $mdp): static
-    {
-        $this->mdp = $mdp;
+        $this->etablissement_id = $etablissement_id;
 
         return $this;
     }
@@ -134,14 +155,50 @@ class Compte
         return $this;
     }
 
-    public function getDernierGoldenLike(): ?\DateTimeInterface
+    public function getDernierGolddenLike(): ?\DateTimeInterface
     {
-        return $this->dernier_golden_like;
+        return $this->dernier_goldden_like;
     }
 
-    public function setDernierGoldenLike(?\DateTimeInterface $dernier_golden_like): static
+    public function setDernierGolddenLike(?\DateTimeInterface $dernier_goldden_like): static
     {
-        $this->dernier_golden_like = $dernier_golden_like;
+        $this->dernier_goldden_like = $dernier_goldden_like;
+
+        return $this;
+    }
+
+    public function getEmail(): ?string
+    {
+        return $this->email;
+    }
+
+    public function setEmail(string $email): static
+    {
+        $this->email = $email;
+
+        return $this;
+    }
+
+    public function getNomAffichage(): ?string
+    {
+        return $this->nom_affichage;
+    }
+
+    public function setNomAffichage(?string $nom_affichage): static
+    {
+        $this->nom_affichage = $nom_affichage;
+
+        return $this;
+    }
+
+    public function isSuspendu(): ?bool
+    {
+        return $this->suspendu;
+    }
+
+    public function setSuspendu(bool $suspendu): static
+    {
+        $this->suspendu = $suspendu;
 
         return $this;
     }

@@ -3,6 +3,7 @@
 namespace App\Entity;
 
 use App\Repository\CommentaireRepository;
+use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 
 #[ORM\Entity(repositoryClass: CommentaireRepository::class)]
@@ -13,14 +14,19 @@ class Commentaire
     #[ORM\Column]
     private ?int $id = null;
 
-    #[ORM\Column]
-    private ?int $id_post = null;
-
-    #[ORM\Column]
-    private ?int $id_compte = null;
-
     #[ORM\Column(length: 2200)]
     private ?string $texte = null;
+
+    #[ORM\Column(type: Types::DATETIME_MUTABLE)]
+    private ?\DateTimeInterface $date = null;
+
+    #[ORM\ManyToOne]
+    #[ORM\JoinColumn(nullable: false)]
+    private ?Post $post_id = null;
+
+    #[ORM\ManyToOne]
+    #[ORM\JoinColumn(nullable: false)]
+    private ?Compte $compte_id = null;
 
     public function getId(): ?int
     {
@@ -34,30 +40,6 @@ class Commentaire
         return $this;
     }
 
-    public function getPostId(): ?int
-    {
-        return $this->id_post;
-    }
-
-    public function setPostId(int $id_post): static
-    {
-        $this->id_post = $id_post;
-
-        return $this;
-    }
-
-    public function getIdCompte(): ?int
-    {
-        return $this->id_compte;
-    }
-
-    public function setIdCompte(int $id_compte): static
-    {
-        $this->id_compte = $id_compte;
-
-        return $this;
-    }
-
     public function getTexte(): ?string
     {
         return $this->texte;
@@ -66,6 +48,42 @@ class Commentaire
     public function setTexte(string $texte): static
     {
         $this->texte = $texte;
+
+        return $this;
+    }
+
+    public function getDate(): ?\DateTimeInterface
+    {
+        return $this->date;
+    }
+
+    public function setDate(\DateTimeInterface $date): static
+    {
+        $this->date = $date;
+
+        return $this;
+    }
+
+    public function getPostId(): ?Post
+    {
+        return $this->post_id;
+    }
+
+    public function setPostId(?Post $post_id): static
+    {
+        $this->post_id = $post_id;
+
+        return $this;
+    }
+
+    public function getCompteId(): ?Compte
+    {
+        return $this->compte_id;
+    }
+
+    public function setCompteId(?Compte $compte_id): static
+    {
+        $this->compte_id = $compte_id;
 
         return $this;
     }

@@ -1,0 +1,50 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Log in!{% endblock %}
+
+{% block body %}
+<form method="post">
+    {% if error %}
+        <div class="alert alert-danger">{{ error.messageKey|trans(error.messageData, 'security') }}</div>
+    {% endif %}
+
+    {% if app.user %}
+        <div class="mb-3">
+            You are logged in as {{ app.user.userIdentifier }}, <a href="{{ path('app_logout') }}">Logout</a>
+        </div>
+    {% endif %}
+
+    <div class="container d-flex flex-column">
+
+        <div class="card w-50 p-5 mx-auto my-5">
+
+            <h1 class="h3 font-weight-normal">Connectez-vous à retarrosoir</h1>
+
+            <form>
+
+                <div class="mb-3">
+                    <label for="inputUsername" class="form-label">Nom d'utilisateur : </label>
+                    <input type="text" value="{{ last_username }}" name="username" id="inputUsername" class="form-control" autocomplete="username" required autofocus>
+                </div>
+                
+                <div class="mb-3">
+                    <label for="inputEmail" class="form-label">Mot de Passe : </label>
+                    <input type="password" name="password" id="inputEmail" class="form-control" autocomplete="password" required>
+                </div>
+                <input type="hidden" name="_csrf_token"
+                    value="{{ csrf_token('authenticate') }}"
+                >
+
+                <button class="btn btn-dark" type="submit">
+                    Se Connecter
+                </button>
+
+            </form>
+
+            <span class="mt-2">Vous n'avez pas encore de compte ? <a href="{{ path('app_compte_new') }}">Inscrivez-vous</a></span>
+
+        </div>
+
+    </div>
+</form>
+{% endblock %}

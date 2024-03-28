@@ -1,0 +1,16 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Retarrosoir{% endblock %}
+
+{% block body %}
+
+    <div class='container'>
+        <h2 class='text-center'>Résultats de recherche</h2>
+
+        {% for compte in comptes %}
+            <p><a href="{{ path('app_compte_show', {'id': compte.id} ) }}">{{ compte.username }} </a></p>
+        {% endfor %}
+
+    </div>
+
+{% endblock %}

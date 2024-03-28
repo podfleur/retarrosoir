@@ -1,0 +1,91 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Compte{% endblock %}
+
+{% block body %}
+    <div class="container mt-5">
+
+        <div class="w-full d-flex items-center justify-center">
+            <div class="flex items-center justify-center w-25">
+                <div class="h-24 w-24 bg-secondary"></div>
+            </div>
+
+            <div class="flex items-center justify-center w-75">
+                <h2>{{ compte.nomAffichage }}</h2>
+                
+                <div class="d-flex justify-between items-center w-full">
+                    <h5 class="font-weight-light">@{{ compte.username }}</h5>
+                    {# Il faut pouvoir modifier le compte seulement si c'est le sien #}
+                    <div class="flex items-center justify-center">
+                        {% if app.user.id == compte.id %}
+                            <a href="{{ path('app_compte_edit', {'id': compte.id}) }}" class="btn btn-sm me-3"><i class="fa-solid fa-gear"></i></a>
+                        {% endif %}
+                    </div>
+                </div>
+
+                {# Mettre la biographie #}
+                <p>{{ compte.biographie }}</p>
+
+                <div class="flex items-center justify-between">
+
+                    <div class="flex items-center justify-center">
+
+                        {% if app.user != null and app.user.id != compte.id %}
+
+                            {% if abonne %}
+                                <a href="{{ path('app_unsubscribe', {'id': compte.id}) }}" class="btn btn-sm btn-danger">Se désabonner</a>
+                            {% else %}
+                                <a href="{{ path('app_subscribe', {'id': compte.id}) }}" class="btn btn-sm btn-primary">S'abonner</a>
+                            {% endif %}
+
+                        {% endif %}
+
+                        <a href="{{ path('app_compte_abonnements', {'id': compte.id}) }}" class="btn btn-sm btn-dark">Abonnements</a>
+
+                        {# Le bouton de signalement ne doit pas être affiché sur le profil de l'utilisateur connecté #}
+                        {% if app.user.id != compte.id %}
+                            <button type="button" class="btn btn-sm btn-danger" data-bs-toggle="modal" data-bs-target="#exampleModal">
+                                <i class="fa-solid fa-flag"></i>
+                            </button>
+                        {% endif %}
+
+                    </div>
+
+                </div>
+
+                <!-- Modal -->
+                <div class="modal fade" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+                <div class="modal-dialog">
+                    <div class="modal-content">
+                    <div class="modal-header">
+                        <h1 class="modal-title fs-5" id="exampleModalLabel">Signaler le compte</h1>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <form action="{{ path('app_compte_signaler', {'id': compte.id}) }}">
+                        <div class="modal-body">
+                                <div class="mb-3">
+                                    <label for="exampleFormControlInput1" class="form-label">Raison du Signalement</label>
+                                    <textarea name="reportArea" type="text" class="form-control" id="exampleFormControlInput1" placeholder="Écrivez ici..."></textarea>
+                                </div>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annuler</button>
+                            <button type="submit" class="btn btn-danger">Signaler</button>
+                        </div>
+                    </form>
+                    </div>
+                </div>
+                </div>
+
+            </div>
+        </div>
+
+        <hr>
+
+        <h3 class="text-center">Publications</h3>
+
+        <h6 class="text-center text-secondary font-weight-light">Aucune publication pour le moment.</h6>
+        
+    </div>
+
+{% endblock %}

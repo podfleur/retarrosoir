@@ -14,20 +14,21 @@ class Post
     #[ORM\Column]
     private ?int $id = null;
 
-    #[ORM\Column]
-    private ?int $id_compte = null;
-
-    #[ORM\Column(length: 75)]
+    #[ORM\Column(length: 75, nullable: true)]
     private ?string $titre = null;
 
-    #[ORM\Column(length: 2200)]
+    #[ORM\Column(length: 2200, nullable: true)]
     private ?string $description = null;
 
-    #[ORM\Column(type: Types::DATE_MUTABLE)]
+    #[ORM\Column(type: Types::DATETIME_MUTABLE)]
     private ?\DateTimeInterface $date = null;
 
-    #[ORM\Column(type: Types::TIME_MUTABLE)]
+    #[ORM\Column(type: Types::DATETIME_MUTABLE)]
     private ?\DateTimeInterface $temps_retard = null;
+
+    #[ORM\ManyToOne]
+    #[ORM\JoinColumn(nullable: false)]
+    private ?Compte $compte_id = null;
 
     public function getId(): ?int
     {
@@ -41,24 +42,12 @@ class Post
         return $this;
     }
 
-    public function getCompteId(): ?int
-    {
-        return $this->id_compte;
-    }
-
-    public function setCompteId(int $id_compte): static
-    {
-        $this->id_compte = $id_compte;
-
-        return $this;
-    }
-
     public function getTitre(): ?string
     {
         return $this->titre;
     }
 
-    public function setTitre(string $titre): static
+    public function setTitre(?string $titre): static
     {
         $this->titre = $titre;
 
@@ -70,7 +59,7 @@ class Post
         return $this->description;
     }
 
-    public function setDescription(string $description): static
+    public function setDescription(?string $description): static
     {
         $this->description = $description;
 
@@ -97,6 +86,18 @@ class Post
     public function setTempsRetard(\DateTimeInterface $temps_retard): static
     {
         $this->temps_retard = $temps_retard;
+
+        return $this;
+    }
+
+    public function getCompteId(): ?Compte
+    {
+        return $this->compte_id;
+    }
+
+    public function setCompteId(?Compte $compte_id): static
+    {
+        $this->compte_id = $compte_id;
 
         return $this;
     }

@@ -1,0 +1,9 @@
+{{ form_start(form) }}
+    {{ form_widget(form) }}
+    <button class="btn btn-dark w-full">{{ button_label|default("S'inscrire") }}</button>
+    <div>
+        {% if app.request.attributes.get('_route') == 'app_compte_new' %}
+            <span class="mt-2">Déjà un compte ? <a href="{{ path('app_login') }}">Se connecter</a></span>
+        {% endif %}
+    </div>
+{{ form_end(form) }}

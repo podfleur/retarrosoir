@@ -1,0 +1,49 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Compte index{% endblock %}
+
+{% block body %}
+    <h1>Compte index</h1>
+
+    <table class="table table bordered">
+        <thead>
+            <tr>
+                <th>Id</th>
+                <th>Id_photo</th>
+                <th>Id_etablissement</th>
+                <th>Pseudo</th>
+                <th>Nom_affichage</th>
+                <th>Email</th>
+                <th>Mdp</th>
+                <th>Biographie</th>
+                <th>Dernier_golden_like</th>
+                <th>actions</th>
+            </tr>
+        </thead>
+        <tbody>
+        {% for compte in comptes %}
+            <tr>
+                <td>{{ compte.id }}</td>
+                <td>{{ compte.photoId }}</td>
+                <td>{{ compte.etablissementId }}</td>
+                <td>{{ compte.username }}</td>
+                <td>{{ compte.nomAffichage }}</td>
+                <td>{{ compte.email }}</td>
+                <td>{{ compte.password }}</td>
+                <td>{{ compte.biographie }}</td>
+                <td>{{ compte.dernierGolddenLike ? compte.dernierGolddenLike|date('Y-m-d') : '' }}</td>
+                <td>
+                    <a href="{{ path('app_compte_show', {'id': compte.id}) }}">show</a>
+                    <a href="{{ path('app_compte_edit', {'id': compte.id}) }}">edit</a>
+                </td>
+            </tr>
+        {% else %}
+            <tr>
+                <td colspan="10">no records found</td>
+            </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+
+    <a href="{{ path('app_compte_new') }}">Create new</a>
+{% endblock %}

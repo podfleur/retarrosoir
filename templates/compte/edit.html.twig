@@ -1,0 +1,23 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Edit Compte{% endblock %}
+
+{% block body %}
+
+    <div class="container">
+
+        <h1>Modifier le Compte</h1>
+    
+        {{ include('compte/_form.html.twig', {'button_label': 'Modifier'}) }}
+
+        <div class="d-flex gap-6 mt-3">
+        
+            <a class="btn btn-secondary" href="{{ path('app_compte_show', {id: compte.id}) }}">Retour</a>
+
+            {{ include('compte/_delete_form.html.twig') }}
+
+        </div>
+
+    </div>
+
+{% endblock %}
