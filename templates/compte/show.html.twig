@@ -26,22 +26,57 @@
                 {# Mettre la biographie #}
                 <p>{{ compte.biographie }}</p>
 
-                <div class="flex items-center justify-center">
+                <div class="flex items-center justify-between">
 
-                    {# Il faut pouvoir s'abonner à un compte seulement si ce n'est pas le sien #}
+                    <div class="flex items-center justify-center">
 
-                    {% if app.user != null and app.user.id != compte.id %}
-                        {# Ajout d'un bouton s'abonner si le compte ne l'est pas déjà, sinon bouton pour se désabonner #}
-                        {% if abonne %}
-                            <a href="{{ path('app_unsubscribe', {'id': compte.id}) }}" class="btn btn-sm btn-danger">Se désabonner</a>
-                        {% else %}
-                            <a href="{{ path('app_subscribe', {'id': compte.id}) }}" class="btn btn-sm btn-primary">S'abonner</a>
+                        {% if app.user != null and app.user.id != compte.id %}
+
+                            {% if abonne %}
+                                <a href="{{ path('app_unsubscribe', {'id': compte.id}) }}" class="btn btn-sm btn-danger">Se désabonner</a>
+                            {% else %}
+                                <a href="{{ path('app_subscribe', {'id': compte.id}) }}" class="btn btn-sm btn-primary">S'abonner</a>
+                            {% endif %}
+
                         {% endif %}
-                    {% endif %}
 
-                    <a href="{{ path('app_compte_abonnements', {'id': compte.id}) }}" class="btn btn-sm btn-dark">Abonnements</a>
+                        <a href="{{ path('app_compte_abonnements', {'id': compte.id}) }}" class="btn btn-sm btn-dark">Abonnements</a>
+
+                        {# Le bouton de signalement ne doit pas être affiché sur le profil de l'utilisateur connecté #}
+                        {% if app.user.id != compte.id %}
+                            <button type="button" class="btn btn-sm btn-danger" data-bs-toggle="modal" data-bs-target="#exampleModal">
+                                <i class="fa-solid fa-flag"></i>
+                            </button>
+                        {% endif %}
+
+                    </div>
 
                 </div>
+
+                <!-- Modal -->
+                <div class="modal fade" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+                <div class="modal-dialog">
+                    <div class="modal-content">
+                    <div class="modal-header">
+                        <h1 class="modal-title fs-5" id="exampleModalLabel">Signaler le compte</h1>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <form action="{{ path('app_compte_signaler', {'id': compte.id}) }}">
+                        <div class="modal-body">
+                                <div class="mb-3">
+                                    <label for="exampleFormControlInput1" class="form-label">Raison du Signalement</label>
+                                    <textarea name="reportArea" type="text" class="form-control" id="exampleFormControlInput1" placeholder="Écrivez ici..."></textarea>
+                                </div>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annuler</button>
+                            <button type="submit" class="btn btn-danger">Signaler</button>
+                        </div>
+                    </form>
+                    </div>
+                </div>
+                </div>
+
             </div>
         </div>
 
