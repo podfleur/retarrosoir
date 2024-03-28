@@ -26,4 +26,23 @@ class HomeController extends AbstractController
             'compte' => $compte
         ]);
     }
+
+    // Je veux créer une route pour rechercher un #, un compte ou un établissement
+    #[Route('/search', name: 'app_search')]
+    public function search(Request $request, EntityManagerInterface $em, UserPasswordHasherInterface $hasher): Response
+    {
+        $this->denyAccessUnlessGranted('ROLE_USER');
+
+        $compte = $this->getUser();
+
+        // Il me faut récupérer les données du formulaire
+        $search = $request->query->get('search');
+
+        return $this->render('home/search.html.twig', [
+            'controller_name' => 'HomeController',
+            'compte' => $compte
+        ]);
+    }
+
+
 }

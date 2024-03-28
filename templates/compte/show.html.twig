@@ -14,7 +14,7 @@
                 <h2>{{ compte.nomAffichage }}</h2>
                 
                 <div class="d-flex justify-between items-center w-full">
-                    <h4>{{ compte.username }}</h4>
+                    <h5 class="font-weight-light">@{{ compte.username }}</h5>
                     <div class="flex items-center justify-center">
                         <a href="{{ path('app_compte_edit', {'id': compte.id}) }}" class="btn btn-sm me-3"><i class="fa-solid fa-gear"></i></a>
                     </div>

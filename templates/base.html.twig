@@ -11,18 +11,36 @@
         {% endblock %}
 
         {% block javascripts %}
+            {% block importmap %}{{ importmap('app') }}{% endblock %}
         {% endblock %}
     </head>
     <body>
 
-        <header class="w-full d-flex justify-content-end p-4" style="background-color: #424B54">
+        <header class="w-full d-flex justify-content-between px-4 pt-4">
 
-        {% if app.user %}
-            <a href="{{ path('app_compte_show', {'id': app.user.id}) }}" class="btn btn-dark me-3">Mon compte</a>
-            <a href="{{ path('app_logout') }}" class="btn btn-danger">Se déconnecter</a>
-        {% endif %}
+            <a href="{{ path('app_home') }}">
+                <img src="{{ asset('pictures/logo.png') }}" alt="logo" width="50px">
+            </a>
+
+            {% if app.user %}
+
+                <form class="w-25">
+                    <div class="input-group">
+                        <input type="text" class="form-control" placeholder="Rechercher..." aria-label="Rechercher..." name="search">
+                        <button class="btn btn-outline-secondary" type="submit" id="search"><i class="fa-solid fa-magnifying-glass"></i></button>
+                        <button class="btn btn-outline-danger" type="button" id="clear-input"><i class="fa-solid fa-xmark"></i></button>
+                    </div>
+                </form>
+
+                <div>
+                    <a href="{{ path('app_compte_show', {'id': app.user.id}) }}" class="btn btn-dark me-3"><i class="fa-solid fa-user"></i></a>
+                    <a href="{{ path('app_logout') }}" class="btn btn-danger"><i class="fa-solid fa-right-from-bracket"></i></a>
+                </div>
+            {% endif %}
 
         </header>
+
+        <hr>
 
         {% block body %}
 

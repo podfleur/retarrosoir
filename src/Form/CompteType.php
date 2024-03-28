@@ -26,9 +26,9 @@ class CompteType extends AbstractType
             ->add('username', TextType::class, [
                 'attr' => ['class' => 'form-control']
             ])
-            // ->add('nom_affichage', TextType::class, [
-            //     'attr' => ['class' => 'form-control']
-            // ])
+            ->add('nom_affichage', TextType::class, [
+                'attr' => ['class' => 'form-control']
+            ])
             ->add('email', EmailType::class, [
                 'attr' => ['class' => 'form-control']
             ])

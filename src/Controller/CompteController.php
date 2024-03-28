@@ -57,12 +57,18 @@ class CompteController extends AbstractController
     }
 
     #[Route('/{id}/edit', name: 'app_compte_edit', methods: ['GET', 'POST'])]
-    public function edit(Request $request, Compte $compte, EntityManagerInterface $entityManager): Response
+    public function edit(Request $request, Compte $compte, EntityManagerInterface $entityManager, UserPasswordHasherInterface $hasher): Response
     {
         $form = $this->createForm(CompteType::class, $compte);
         $form->handleRequest($request);
 
+        // On doit récupérer le nouveau mot de passe
+
         if ($form->isSubmitted() && $form->isValid()) {
+
+            // Il faut modifier le mot de passe en le hashant
+            $compte->setPassword($hasher->hashPassword($compte, $compte->getPassword()));
+
             $entityManager->flush();
 
             return $this->redirectToRoute('app_compte_index', [], Response::HTTP_SEE_OTHER);
@@ -85,18 +91,10 @@ class CompteController extends AbstractController
         return $this->redirectToRoute('app_compte_index', [], Response::HTTP_SEE_OTHER);
     }
 
-    // Route permettant de se connecter
-    #[Route('/login', name: 'app_compte_login', methods: ['GET', 'POST'])]
-    public function login(): Response
-    {
-        return $this->render('compte/login.html.twig');
-    }
-
-    // Route permettant de se déconnecter
-    #[Route('/logout', name: 'app_compte_logout', methods: ['GET'])]
-    public function logout(): Response
-    {
-        return $this->render('compte/logout.html.twig');
+    // Route permettant de consulter les abonnements
+    #[Route('/{id}/abonnements', name: 'app_compte_abonnements', methods: ['GET'])]
+    public function abonnements(Request $request, Compte $compte, EntityManagerInterface $entityManager) {
+        
     }
 
 }
