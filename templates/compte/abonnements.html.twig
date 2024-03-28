@@ -1,0 +1,11 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Retarrosoir{% endblock %}
+
+{% block body %}
+
+    {% for elem in abonnements %}
+        <p>{{ elem.username }}</p>
+    {% endfor %}
+
+{% endblock %}

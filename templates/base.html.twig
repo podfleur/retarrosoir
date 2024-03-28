@@ -24,7 +24,7 @@
 
             {% if app.user %}
 
-                <form class="w-25">
+                <form class="w-25" action="{{ path('app_search') }}">
                     <div class="input-group">
                         <input type="text" class="form-control" placeholder="Rechercher..." aria-label="Rechercher..." name="search">
                         <button class="btn btn-outline-secondary" type="submit" id="search"><i class="fa-solid fa-magnifying-glass"></i></button>

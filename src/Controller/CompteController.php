@@ -3,6 +3,7 @@
 namespace App\Controller;
 
 use App\Entity\Compte;
+use App\Entity\Abonnement;
 use App\Form\CompteType;
 use App\Repository\CompteRepository;
 use Doctrine\ORM\EntityManagerInterface;
@@ -49,13 +50,30 @@ class CompteController extends AbstractController
     }
 
     #[Route('/{id}', name: 'app_compte_show', methods: ['GET'])]
-    public function show(Compte $compte): Response
+    public function show(Compte $compte, EntityManagerInterface $em): Response
     {
+        // Vérifier si le compte connecté est abonné au compte affiché uniquement si le compte n'est pas le sien
+        $user = $this->getUser();
+        $abonne = false;
+    
+        if ($user !== null && $compte !== $user) {
+            $abonnement = $em->getRepository(Abonnement::class)->findOneBy([
+                'suiveur_id' => $user,
+                'suivi_personne_id' => $compte
+            ]);
+    
+            if ($abonnement !== null) {
+                // Si un abonnement est trouvé, alors le compte connecté est abonné au compte affiché
+                $abonne = true;
+            }
+        }
+        
         return $this->render('compte/show.html.twig', [
             'compte' => $compte,
+            'abonne' => $abonne,
         ]);
     }
-
+    
     #[Route('/{id}/edit', name: 'app_compte_edit', methods: ['GET', 'POST'])]
     public function edit(Request $request, Compte $compte, EntityManagerInterface $entityManager, UserPasswordHasherInterface $hasher): Response
     {
@@ -91,10 +109,24 @@ class CompteController extends AbstractController
         return $this->redirectToRoute('app_compte_index', [], Response::HTTP_SEE_OTHER);
     }
 
-    // Route permettant de consulter les abonnements
-    #[Route('/{id}/abonnements', name: 'app_compte_abonnements', methods: ['GET'])]
-    public function abonnements(Request $request, Compte $compte, EntityManagerInterface $entityManager) {
-        
+    #[Route('/abonnements/{id}', name: 'app_compte_abonnements', methods: ['GET'])]
+    public function abonnements(int $id, EntityManagerInterface $em): Response
+    {
+        // Récupérer le compte à partir de l'ID
+        $compte = $em->getRepository(Compte::class)->find($id);
+
+        // Vérifier si le compte a été trouvé
+        if (!$compte) {
+            throw $this->createNotFoundException('Compte non trouvé');
+        }
+
+        // Récupérer les abonnements du compte
+        $abonnements = $em->getRepository(Abonnement::class)->findBy(['suiveur_id' => $compte]);
+
+        return $this->render('compte/abonnements.html.twig', [
+            'abonnements' => $abonnements,
+        ]);
     }
+
 
 }

@@ -15,8 +15,11 @@
                 
                 <div class="d-flex justify-between items-center w-full">
                     <h5 class="font-weight-light">@{{ compte.username }}</h5>
+                    {# Il faut pouvoir modifier le compte seulement si c'est le sien #}
                     <div class="flex items-center justify-center">
-                        <a href="{{ path('app_compte_edit', {'id': compte.id}) }}" class="btn btn-sm me-3"><i class="fa-solid fa-gear"></i></a>
+                        {% if app.user.id == compte.id %}
+                            <a href="{{ path('app_compte_edit', {'id': compte.id}) }}" class="btn btn-sm me-3"><i class="fa-solid fa-gear"></i></a>
+                        {% endif %}
                     </div>
                 </div>
 
@@ -24,7 +27,20 @@
                 <p>{{ compte.biographie }}</p>
 
                 <div class="flex items-center justify-center">
-                    <a href="{{ path('app_home') }}" class="btn btn-sm btn-secondary">Accueil</a>
+
+                    {# Il faut pouvoir s'abonner à un compte seulement si ce n'est pas le sien #}
+
+                    {% if app.user != null and app.user.id != compte.id %}
+                        {# Ajout d'un bouton s'abonner si le compte ne l'est pas déjà, sinon bouton pour se désabonner #}
+                        {% if abonne %}
+                            <a href="{{ path('app_unsubscribe', {'id': compte.id}) }}" class="btn btn-sm btn-danger">Se désabonner</a>
+                        {% else %}
+                            <a href="{{ path('app_subscribe', {'id': compte.id}) }}" class="btn btn-sm btn-primary">S'abonner</a>
+                        {% endif %}
+                    {% endif %}
+
+                    <a href="{{ path('app_compte_abonnements', {'id': compte.id}) }}" class="btn btn-sm btn-dark">Abonnements</a>
+
                 </div>
             </div>
         </div>
