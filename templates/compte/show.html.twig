@@ -5,9 +5,15 @@
 {% block body %}
     <div class="container mt-5">
 
-        <div class="w-full d-flex items-center justify-center">
-            <div class="flex items-center justify-center w-25">
-                <div class="h-24 w-24 bg-secondary"></div>
+        <div class="w-full d-flex items-center justify-center gap-5">
+
+            <div class="bg-secondary rounded-circle col-6" style="width: 200px; height: 200px">
+
+                {# On va afficher la photo de profil #}
+                {% if donneesPhoto %}
+                    <img src="data:image/{{ format }};base64,{{ donneesPhoto }}" type="{{ format }}" alt="Photo de profil" style="width:100%; height:auto">
+                {% endif %}
+
             </div>
 
             <div class="flex items-center justify-center w-75">
