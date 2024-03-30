@@ -8,7 +8,17 @@
         <h2 class='text-center'>Résultats de recherche</h2>
 
         {% for compte in comptes %}
-            <p><a href="{{ path('app_compte_show', {'id': compte.id} ) }}">{{ compte.username }} </a></p>
+            <div class='card w-50'>
+                <div class='card-body'>
+                    <h5 class='card-title
+                    {% if compte.getUsername() == 'Retarrosoir' %}
+                        text-danger
+                    {% endif %}
+                    '>{{ compte.getUsername() }}</h5>
+                    <p class='card-text'>{{ compte.getBiographie() }}</p>
+                    <a href='{{ path('app_compte_show', {'id': compte.getId()}) }}' class='btn btn-primary'>Voir le compte</a>
+                </div>
+            </div>
         {% endfor %}
 
     </div>

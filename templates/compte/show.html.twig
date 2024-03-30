@@ -89,3 +89,15 @@
     </div>
 
 {% endblock %}
+
+{% block javascripts %}
+    <script>
+        document.querySelector('form').addEventListener('submit', function(e) {
+            let reportArea = document.querySelector('textarea[name="reportArea"]').value;
+            if (reportArea == '') {
+                e.preventDefault();
+                alert('Veuillez remplir le champ de la raison du signalement.');
+            }
+        });
+    </script>
+{% endblock %}
