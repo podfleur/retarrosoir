@@ -38,9 +38,10 @@ class CompteController extends AbstractController
 
         if ($form->isSubmitted() && $form->isValid()) {
 
-            $compte->setUsername($compte->getEmail());
+            $compte->setUsername($compte->getUsername());
             $compte->setPassword($hasher->hashPassword($compte, $compte->getPassword()));
             $compte->setRoles(['ROLE_USER']);
+            $compte->setSuspendu(false);
 
             $entityManager->persist($compte);
             $entityManager->flush();
@@ -101,26 +102,28 @@ class CompteController extends AbstractController
 
         if ($form->isSubmitted() && $form->isValid()) {
 
-            // Il faut modifier la photo de profil
-            $photo = new Photo();
-            $photo->setDonneesPhoto(file_get_contents($form->get('data')->getData()));
-            $entityManager->persist($photo);
+            // Il faut modifier la photo de profil si elle a été modifiée
+            if ($form->get('data')->getData() != null) {
+                $photo = $compte->getPhotoId();
+                $photo->setDonneesPhoto(file_get_contents($form->get('data')->getData()));
+                $entityManager->persist($photo);
+                
+                // On récupère le type de la photo
+                $type = $form->get('data')->getData()->getMimeType();
+                
+                // On ajoute un nouveau format pour la photo si il n'existe pas sinon on récupère le format existant et on attribue à la photo l'id du format
+                $format = $entityManager->getRepository(Format::class)->findOneBy(['nom' => $type]);
 
-            // On récupère le type de la photo
-            $type = $form->get('data')->getData()->getMimeType();
-            
-            // On ajoute un nouveau format pour la photo si il n'existe pas sinon on récupère le format existant et on attribue à la photo l'id du format
-            $format = $entityManager->getRepository(Format::class)->findOneBy(['nom' => $type]);
+                if (!$format) {
+                    $format = new Format();
+                    $format->setNom($type);
+                    $entityManager->persist($format);
+                }
 
-            if (!$format) {
-                $format = new Format();
-                $format->setNom($type);
-                $entityManager->persist($format);
+                $photo->setFormatId($format);
+
+                $compte->setPhotoId($photo);
             }
-
-            $photo->setFormatId($format);
-
-            $compte->setPhotoId($photo);
 
             // Il faut modifier le mot de passe en le hashant
             $compte->setPassword($hasher->hashPassword($compte, $compte->getPassword()));

@@ -7,11 +7,12 @@
 
         <div class="w-full d-flex items-center justify-center gap-5">
 
-            <div class="bg-secondary rounded-circle col-6" style="width: 200px; height: 200px">
+            <div style="width: 200px; height: 200px">
 
-                {# On va afficher la photo de profil #}
                 {% if donneesPhoto %}
-                    <img src="data:image/{{ format }};base64,{{ donneesPhoto }}" type="{{ format }}" alt="Photo de profil" style="width:100%; height:auto">
+                    <img src="data:image/{{ format }};base64,{{ donneesPhoto }}" alt="Photo de profil" width="200" height="200" class="rounded-circle border border-dark">
+                {% else %}
+                    <div class="rounded-circle bg-secondary" style="width: 200px; height: 200px;"></div>
                 {% endif %}
 
             </div>
@@ -94,16 +95,4 @@
         
     </div>
 
-{% endblock %}
-
-{% block javascripts %}
-    <script>
-        document.querySelector('form').addEventListener('submit', function(e) {
-            let reportArea = document.querySelector('textarea[name="reportArea"]').value;
-            if (reportArea == '') {
-                e.preventDefault();
-                alert('Veuillez remplir le champ de la raison du signalement.');
-            }
-        });
-    </script>
 {% endblock %}

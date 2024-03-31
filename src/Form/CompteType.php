@@ -21,7 +21,7 @@ class CompteType extends AbstractType
             ->add('data', FileType::class, [
                 'label' => 'Photo de profil',
                 'mapped' => false,
-                'required' => true,
+                'required' => false,
                 'attr' => ['accept' => 'image/*']
             ])
             // ->add('id_etablissement', TextType::class, [
