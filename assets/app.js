@@ -1,9 +1,32 @@
-/*
- * Welcome to your app's main JavaScript file!
- *
- * This file will be included onto the page via the importmap() Twig function,
- * which should already be in your base.html.twig.
- */
-import './styles/app.css';
+// Autocompletion barre de recherche et affichage de la croix rouge avec jquery
 
-console.log('This log comes from assets/app.js - welcome to AssetMapper! 🎉');
+$(document).ready(function() {
+    $('#search-bar').on('input', () => {
+        if ($('#search-bar').val() !== '') {
+            $('#clear-input').show();
+        } else {
+            $('#clear-input').hide();
+        }
+
+        $('#search-bar').autocomplete({
+            source: function(request, response) {
+                $.ajax({
+                    url: "/autocomplete",
+                    dataType: 'json',
+                    data: {
+                        search: request.term // Envoie le terme de recherche au serveur
+                    },
+                    success: function(data) {
+                        console.log(data)
+                        response(data); // Affiche les suggestions renvoyées par le serveur
+                    }
+                });
+            },
+            minLength: 1 // Nombre minimum de caractères avant de lancer une recherche
+        });
+    })
+    $('#clear-input').on('click', () => {
+        $('#search-bar').val('');
+        $('#clear-input').hide();
+    })
+})

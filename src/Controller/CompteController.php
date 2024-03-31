@@ -5,6 +5,8 @@ namespace App\Controller;
 use App\Entity\Compte;
 use App\Entity\Abonnement;
 use App\Entity\Signalement;
+use App\Entity\Photo;
+use App\Entity\Format;
 use App\Form\CompteType;
 use App\Repository\CompteRepository;
 use Doctrine\ORM\EntityManagerInterface;
@@ -14,6 +16,7 @@ use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 use Symfony\Component\Security\Core\User\UserInterface;
+use Symfony\Component\HttpFoundation\File\File;
 
 #[Route('/compte')]
 class CompteController extends AbstractController
@@ -35,9 +38,10 @@ class CompteController extends AbstractController
 
         if ($form->isSubmitted() && $form->isValid()) {
 
-            $compte->setUsername($compte->getEmail());
+            $compte->setUsername($compte->getUsername());
             $compte->setPassword($hasher->hashPassword($compte, $compte->getPassword()));
             $compte->setRoles(['ROLE_USER']);
+            $compte->setSuspendu(false);
 
             $entityManager->persist($compte);
             $entityManager->flush();
@@ -57,6 +61,16 @@ class CompteController extends AbstractController
         // Vérifier si le compte connecté est abonné au compte affiché uniquement si le compte n'est pas le sien
         $user = $this->getUser();
         $abonne = false;
+        $donneesPhoto = null;
+        $format = null;
+
+        // Je dois récupérer la photo de profil
+        $photo = $compte->getPhotoId();
+
+        if ($photo) {
+            $format = $photo->getFormatId();
+            $donneesPhoto = stream_get_contents($photo->getDonneesPhoto());
+        }
     
         if ($user !== null && $compte !== $user) {
             $abonnement = $em->getRepository(Abonnement::class)->findOneBy([
@@ -73,6 +87,8 @@ class CompteController extends AbstractController
         return $this->render('compte/show.html.twig', [
             'compte' => $compte,
             'abonne' => $abonne,
+            'donneesPhoto' => $donneesPhoto != null ? base64_encode($donneesPhoto) : $donneesPhoto,
+            'format' => $format != null ? $format->getNom() : $format
         ]);
     }
     
@@ -86,12 +102,35 @@ class CompteController extends AbstractController
 
         if ($form->isSubmitted() && $form->isValid()) {
 
+            // Il faut modifier la photo de profil si elle a été modifiée
+            if ($form->get('data')->getData() != null) {
+                $photo = $compte->getPhotoId();
+                $photo->setDonneesPhoto(file_get_contents($form->get('data')->getData()));
+                $entityManager->persist($photo);
+                
+                // On récupère le type de la photo
+                $type = $form->get('data')->getData()->getMimeType();
+                
+                // On ajoute un nouveau format pour la photo si il n'existe pas sinon on récupère le format existant et on attribue à la photo l'id du format
+                $format = $entityManager->getRepository(Format::class)->findOneBy(['nom' => $type]);
+
+                if (!$format) {
+                    $format = new Format();
+                    $format->setNom($type);
+                    $entityManager->persist($format);
+                }
+
+                $photo->setFormatId($format);
+
+                $compte->setPhotoId($photo);
+            }
+
             // Il faut modifier le mot de passe en le hashant
             $compte->setPassword($hasher->hashPassword($compte, $compte->getPassword()));
 
             $entityManager->flush();
 
-            return $this->redirectToRoute('app_compte_index', [], Response::HTTP_SEE_OTHER);
+            return $this->redirectToRoute('app_compte_show', ['id' => $compte->getId()], Response::HTTP_SEE_OTHER);
         }
 
         return $this->render('compte/edit.html.twig', [

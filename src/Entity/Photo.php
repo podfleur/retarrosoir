@@ -14,7 +14,7 @@ class Photo
     #[ORM\Column]
     private ?int $id = null;
 
-    #[ORM\Column(type: Types::BINARY)]
+    #[ORM\Column(type: Types::BLOB)]
     private $donnees_photo = null;
 
     #[ORM\ManyToOne]
