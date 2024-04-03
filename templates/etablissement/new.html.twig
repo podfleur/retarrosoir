@@ -1,11 +1,13 @@
 {% extends 'base.html.twig' %}
 
-{% block title %}New Etablissement{% endblock %}
+{% block title %}Ajouter un Etablissement{% endblock %}
 
 {% block body %}
-    <h1>Create new Etablissement</h1>
+    <div class="container">
+        <h1>Ajouter un Etablissement</h1>
 
-    {{ include('etablissement/_form.html.twig') }}
+        {{ include('etablissement/_form.html.twig') }}
 
-    <a href="{{ path('app_etablissement_index') }}">back to list</a>
+        <a class="btn btn-secondary" href="{{ referer }}">Retour</a>
+    </div>
 {% endblock %}

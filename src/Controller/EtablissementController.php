@@ -27,6 +27,10 @@ class EtablissementController extends AbstractController
     #[Route('/new', name: 'app_etablissement_new', methods: ['GET', 'POST'])]
     public function new(Request $request, EntityManagerInterface $entityManager): Response
     {
+
+        // On récupère l'URL dont on provient
+        $referer = $request->headers->get('referer');
+
         $etablissement = new Etablissement();
         $form = $this->createForm(EtablissementType::class, $etablissement);
         $form->handleRequest($request);
@@ -72,6 +76,7 @@ class EtablissementController extends AbstractController
         return $this->render('etablissement/new.html.twig', [
             'etablissement' => $etablissement,
             'form' => $form,
+            'referer' => $referer
         ]);
     }
 

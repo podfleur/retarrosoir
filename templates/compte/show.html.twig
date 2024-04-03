@@ -36,10 +36,7 @@
                     </div>
                 </div>
 
-                {# Mettre la biographie #}
-                <p>{{ compte.biographie }}</p>
-
-                <div class="flex items-center justify-between">
+                <div class="flex items-center justify-between flex-column">
 
                     <div class="flex items-center justify-center">
 
@@ -53,8 +50,6 @@
 
                         {% endif %}
 
-                        <a href="{{ path('app_compte_abonnements', {'id': compte.id}) }}" class="btn btn-sm btn-dark">Abonnements</a>
-
                         {# Le bouton de signalement ne doit pas être affiché sur le profil de l'utilisateur connecté #}
                         {% if app.user.id != compte.id %}
                             <button type="button" class="btn btn-sm btn-danger" data-bs-toggle="modal" data-bs-target="#exampleModal">
@@ -63,6 +58,17 @@
                         {% endif %}
 
                     </div>
+
+                    <div class="d-flex align-items-center justify-content-between mt-2 w-50">
+                        <a href="" class="text-decoration-none"><span class="text-dark">{{ nbAbonnes }} Abonnés</span></a>
+                        <span class="font-bold">|</span>
+                        <a href="{{ path('app_compte_abonnements', {'id': compte.id}) }}" class="text-decoration-none"><span class="text-dark">{{ nbAbonnements }} Abonnements</span></a>
+                        <span class="font-bold">|</span>
+                        <span class="text-dark">{{ nbPost }} {{ nbPost > 1 ? "Publication" : "Publications" }}</span>
+                    </div>
+
+                    {# Mettre la biographie #}
+                    <p>{{ compte.biographie }}</p>
 
                 </div>
 
@@ -97,7 +103,24 @@
 
         <h3 class="text-center">Publications</h3>
 
-        <h6 class="text-center text-secondary font-weight-light">Aucune publication pour le moment.</h6>
+        {# {% if posts is empty %}
+            <div class="d-flex justify-center items-center">
+                <h4 class="text-center">Aucune publication</h4>
+            </div>
+        {% else %}
+            <div class="d-flex justify-center items-center gap-5 flex-wrap">
+                {% for p in posts %}
+                    <div class="card" style="width: 18rem;">
+                        <div class="card-body">
+                            <h5 class="card-title">{{ p.titre }}</h5>
+                            <p class="card-text">{{ p.description }}</p>
+                            <a href="{{ path('app_post_show', {'id': p.id}) }}" class="btn btn-primary">Voir</a>
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+        {% endif %} #}
+
         
     </div>
 
