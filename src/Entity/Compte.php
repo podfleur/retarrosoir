@@ -46,6 +46,9 @@ class Compte implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\Column(length: 30, nullable: true)]
     private ?string $nom_affichage = null;
 
+    #[ORM\Column]
+    private ?bool $suspendu = null;
+
     public function getId(): ?int
     {
         return $this->id;
@@ -184,6 +187,18 @@ class Compte implements UserInterface, PasswordAuthenticatedUserInterface
     public function setNomAffichage(?string $nom_affichage): static
     {
         $this->nom_affichage = $nom_affichage;
+
+        return $this;
+    }
+
+    public function isSuspendu(): ?bool
+    {
+        return $this->suspendu;
+    }
+
+    public function setSuspendu(bool $suspendu): static
+    {
+        $this->suspendu = $suspendu;
 
         return $this;
     }

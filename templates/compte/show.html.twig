@@ -3,36 +3,125 @@
 {% block title %}Compte{% endblock %}
 
 {% block body %}
-    <h1>Compte</h1>
+    <div class="container mt-5">
 
-    <table class="table">
-        <tbody>
-            <tr>
-                <th>Pseudo</th>
-                <td>{{ compte.username }}</td>
-            </tr>
-            <tr>
-                <th>Nom_affichage</th>
-                <td>{{ compte.nomAffichage }}</td>
-            </tr>
-            <tr>
-                <th>Email</th>
-                <td>{{ compte.email }}</td>
-            </tr>
-            <tr>
-                <th>Biographie</th>
-                <td>{{ compte.biographie }}</td>
-            </tr>
-            <tr>
-                <th>Dernier_golden_like</th>
-                <td>{{ compte.dernierGolddenLike ? compte.dernierGolddenLike|date('Y-m-d') : '' }}</td>
-            </tr>
-        </tbody>
-    </table>
+        <div class="w-full d-flex items-center justify-center gap-5">
 
-    <a href="{{ path('app_compte_index') }}">back to list</a>
+            <div style="width: 200px; height: 200px">
 
-    <a href="{{ path('app_compte_edit', {'id': compte.id}) }}">edit</a>
+                {% if donneesPhoto %}
+                    <img src="data:image/{{ format }};base64,{{ donneesPhoto }}" alt="Photo de profil" width="200" height="200" class="rounded-circle border border-dark">
+                {% else %}
+                    <div class="rounded-circle bg-secondary" style="width: 200px; height: 200px;"></div>
+                {% endif %}
 
-    {{ include('compte/_delete_form.html.twig') }}
+            </div>
+
+            <div class="flex items-center justify-center w-75">
+                <h2>{{ compte.nomAffichage }}</h2>
+                
+                <div class="d-flex justify-between items-center w-full">
+                    <div>
+                        <h5 class="font-weight-light">@{{ compte.username }}</h5>
+                        {% if compte.getEtablissementId is not null %}
+                            <h6><a href="{{ path('app_etablissement_show', { 'id': compte.getEtablissementId().getId }) }}"><span class="badge text-bg-warning">{{ compte.etablissementId.nom }}</span></a></h6>
+                        {% endif %}
+                    </div>
+
+                    {# Il faut pouvoir modifier le compte seulement si c'est le sien #}
+                    <div class="flex items-center justify-center">
+                        {% if app.user.id is not null and app.user.id == compte.getId() %}
+                            <a href="{{ path('app_compte_edit', {'id': compte.id}) }}" class="btn btn-sm me-3"><i class="fa-solid fa-gear"></i></a>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <div class="flex items-center justify-between flex-column">
+
+                    <div class="flex items-center justify-center">
+
+                        {% if app.user != null and app.user.id != compte.id %}
+
+                            {% if abonne %}
+                                <a href="{{ path('app_unsubscribe', {'id': compte.id}) }}" class="btn btn-sm btn-danger">Se désabonner</a>
+                            {% else %}
+                                <a href="{{ path('app_subscribe', {'id': compte.id}) }}" class="btn btn-sm btn-primary">S'abonner</a>
+                            {% endif %}
+
+                        {% endif %}
+
+                        {# Le bouton de signalement ne doit pas être affiché sur le profil de l'utilisateur connecté #}
+                        {% if app.user.id != compte.id %}
+                            <button type="button" class="btn btn-sm btn-danger" data-bs-toggle="modal" data-bs-target="#exampleModal">
+                                <i class="fa-solid fa-flag"></i>
+                            </button>
+                        {% endif %}
+
+                    </div>
+
+                    <div class="d-flex align-items-center justify-content-between mt-2 w-50">
+                        <a href="" class="text-decoration-none"><span class="text-dark">{{ nbAbonnes }} Abonnés</span></a>
+                        <span class="font-bold">|</span>
+                        <a href="{{ path('app_compte_abonnements', {'id': compte.id}) }}" class="text-decoration-none"><span class="text-dark">{{ nbAbonnements }} Abonnements</span></a>
+                        <span class="font-bold">|</span>
+                        <span class="text-dark">{{ nbPost }} {{ nbPost > 1 ? "Publication" : "Publications" }}</span>
+                    </div>
+
+                    {# Mettre la biographie #}
+                    <p>{{ compte.biographie }}</p>
+
+                </div>
+
+                <!-- Modal -->
+                <div class="modal fade" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+                <div class="modal-dialog">
+                    <div class="modal-content">
+                    <div class="modal-header">
+                        <h1 class="modal-title fs-5" id="exampleModalLabel">Signaler le compte</h1>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <form action="{{ path('app_compte_signaler', {'id': compte.id}) }}">
+                        <div class="modal-body">
+                                <div class="mb-3">
+                                    <label for="exampleFormControlInput1" class="form-label">Raison du Signalement</label>
+                                    <textarea name="reportArea" type="text" class="form-control" id="exampleFormControlInput1" placeholder="Écrivez ici..."></textarea>
+                                </div>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annuler</button>
+                            <button type="submit" class="btn btn-danger">Signaler</button>
+                        </div>
+                    </form>
+                    </div>
+                </div>
+                </div>
+
+            </div>
+        </div>
+
+        <hr>
+
+        <h3 class="text-center">Publications</h3>
+
+        {# {% if posts is empty %}
+            <div class="d-flex justify-center items-center">
+                <h4 class="text-center">Aucune publication</h4>
+            </div>
+        {% else %}
+            <div class="d-flex justify-center items-center gap-5 flex-wrap">
+                {% for p in posts %}
+                    <div class="card" style="width: 18rem;">
+                        <div class="card-body">
+                            <h5 class="card-title">{{ p.titre }}</h5>
+                            <p class="card-text">{{ p.description }}</p>
+                            <a href="{{ path('app_post_show', {'id': p.id}) }}" class="btn btn-primary">Voir</a>
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+        {% endif %} #}
+
+        
+    </div>
+
 {% endblock %}
