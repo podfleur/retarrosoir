@@ -21,10 +21,16 @@
                 <h2>{{ compte.nomAffichage }}</h2>
                 
                 <div class="d-flex justify-between items-center w-full">
-                    <h5 class="font-weight-light">@{{ compte.username }}</h5>
+                    <div>
+                        <h5 class="font-weight-light">@{{ compte.username }}</h5>
+                        {% if compte.getEtablissementId is not null %}
+                            <h6><a href="{{ path('app_etablissement_show', { 'id': compte.getEtablissementId().getId }) }}"><span class="badge text-bg-warning">{{ compte.etablissementId.nom }}</span></a></h6>
+                        {% endif %}
+                    </div>
+
                     {# Il faut pouvoir modifier le compte seulement si c'est le sien #}
                     <div class="flex items-center justify-center">
-                        {% if app.user.id == compte.id %}
+                        {% if app.user.id is not null and app.user.id == compte.getId() %}
                             <a href="{{ path('app_compte_edit', {'id': compte.id}) }}" class="btn btn-sm me-3"><i class="fa-solid fa-gear"></i></a>
                         {% endif %}
                     </div>

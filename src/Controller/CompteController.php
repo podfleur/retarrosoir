@@ -38,6 +38,36 @@ class CompteController extends AbstractController
 
         if ($form->isSubmitted() && $form->isValid()) {
 
+            if ($form->get('data')->getData() != null) {
+                $photo = $compte->getPhotoId();
+                if ($photo !== null) { // Vérifier si la photo est définie
+                    $photo->setDonneesPhoto(file_get_contents($form->get('data')->getData()));
+                    $entityManager->persist($photo);
+
+                } else {
+                    // La photo n'est pas définie, vous devez la créer
+                    $photo = new Photo();
+                    $photo->setDonneesPhoto(file_get_contents($form->get('data')->getData()));
+                    $entityManager->persist($photo);
+                    $compte->setPhotoId($photo);
+                }
+
+                // On récupère le type de la photo
+                $type = $form->get('data')->getData()->getMimeType();
+                    
+                // On ajoute un nouveau format pour la photo si il n'existe pas sinon on récupère le format existant et on attribue à la photo l'id du format
+                $format = $entityManager->getRepository(Format::class)->findOneBy(['nom' => $type]);
+
+                if (!$format) {
+                    $format = new Format();
+                    $format->setNom($type);
+                    $entityManager->persist($format);
+                }
+
+                $photo->setFormatId($format);
+                $compte->setPhotoId($photo);
+            }
+
             $compte->setUsername($compte->getUsername());
             $compte->setPassword($hasher->hashPassword($compte, $compte->getPassword()));
             $compte->setRoles(['ROLE_USER']);
