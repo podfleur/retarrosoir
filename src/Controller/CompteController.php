@@ -7,6 +7,7 @@ use App\Entity\Abonnement;
 use App\Entity\Signalement;
 use App\Entity\Photo;
 use App\Entity\Format;
+use App\Entity\Post;
 use App\Form\CompteType;
 use App\Repository\CompteRepository;
 use Doctrine\ORM\EntityManagerInterface;
@@ -113,20 +114,39 @@ class CompteController extends AbstractController
                 $abonne = true;
             }
         }
+
+        // On calcule le nombre d'abonnements et d'abonnés du compte
+        $nbAbonnements = count($em->getRepository(Abonnement::class)->findBy(['suiveur_id' => $compte]));
+        $nbAbonnes = count($em->getRepository(Abonnement::class)->findBy(['suivi_personne_id' => $compte]));
         
+        // On calcule le nombre de posts du compte
+        $nbPost = count($em->getRepository(Post::class)->findBy(['compte_id' => $compte]));
+        
+        // On récupère les posts du compte
+        $posts = $em->getRepository(Post::class)->findBy(['compte_id' => $compte]);
+
         return $this->render('compte/show.html.twig', [
             'compte' => $compte,
             'abonne' => $abonne,
             'donneesPhoto' => $donneesPhoto != null ? base64_encode($donneesPhoto) : $donneesPhoto,
-            'format' => $format != null ? $format->getNom() : $format
+            'format' => $format != null ? $format->getNom() : $format,
+            'nbAbonnements' => $nbAbonnements,
+            'nbAbonnes' => $nbAbonnes,
+            'nbPost' => $nbPost,
+            'posts' => $posts,
         ]);
     }
     
     #[Route('/{id}/edit', name: 'app_compte_edit', methods: ['GET', 'POST'])]
-    public function edit(Request $request, Compte $compte, EntityManagerInterface $entityManager, UserPasswordHasherInterface $hasher): Response
+    public function edit(Request $request, Compte $compte, EntityManagerInterface $entityManager, UserPasswordHasherInterface $hasher, $id): Response
     {
         $form = $this->createForm(CompteType::class, $compte);
         $form->handleRequest($request);
+
+        // On doit vérifier que le compte à modifier est le même que celui connecté
+        if ($compte !== $this->getUser()) {
+            return $this->redirectToRoute('app_home');
+        }
 
         // On doit récupérer le nouveau mot de passe
 
