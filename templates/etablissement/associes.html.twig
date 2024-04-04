@@ -1,0 +1,16 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Retarrosoir{% endblock %}
+
+{% block body %}
+
+    {% for compte in comptes %}
+        <div class="card">
+            <div class="card-body">
+                <h5 class="card-title">{{ compte.getUsername() }}</h5>
+                <a href="{{ path('app_compte_show', {'id': compte.getId()}) }}" class="btn btn-primary">Voir</a>
+            </div>
+        </div>
+    {% endfor %}
+
+{% endblock %}
