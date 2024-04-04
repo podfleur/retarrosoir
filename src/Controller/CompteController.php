@@ -8,6 +8,7 @@ use App\Entity\Signalement;
 use App\Entity\Photo;
 use App\Entity\Format;
 use App\Entity\Post;
+use App\Entity\PostPhoto;
 use App\Form\CompteType;
 use App\Repository\CompteRepository;
 use Doctrine\ORM\EntityManagerInterface;
@@ -99,8 +100,8 @@ class CompteController extends AbstractController
         $photo = $compte->getPhotoId();
 
         if ($photo) {
-            $format = $photo->getFormatId();
-            $donneesPhoto = stream_get_contents($photo->getDonneesPhoto());
+            $formatPhotoProfil = $photo->getFormatId();
+            $donneesPhotoProfil = stream_get_contents($photo->getDonneesPhoto());
         }
     
         if ($user !== null && $compte !== $user) {
@@ -122,18 +123,41 @@ class CompteController extends AbstractController
         // On calcule le nombre de posts du compte
         $nbPost = count($em->getRepository(Post::class)->findBy(['compte_id' => $compte]));
         
-        // On récupère les posts du compte
+        // On récupère les photos de posts associés au profil sachant que l'utilisateur est dans la table compte, les photos dans la tables photo, les posts dans la table post, les formats dans la table format et les photos de post dans la table post_photo
         $posts = $em->getRepository(Post::class)->findBy(['compte_id' => $compte]);
+        $postsWithPhotos = [];
+
+        foreach ($posts as $post) {
+
+            $postPhotos = [];
+            $postPhotosEntities = $em->getRepository(PostPhoto::class)->findBy(['post_id' => $post]);
+            foreach ($postPhotosEntities as $postPhoto) {
+                $photo = $postPhoto->getPhotoId();
+                $donneesPhoto = base64_encode(stream_get_contents($photo->getDonneesPhoto()));
+                $format = $photo->getFormatId()->getNom();
+                $postPhotos[] = [
+                    'donneesPhoto' => $donneesPhoto,
+                    'format' => $format,
+                ];
+            }
+
+            // Ajoutez à la liste des posts avec leurs photos
+            $postsWithPhotos[] = [
+                'post' => $post,
+                'photos' => $postPhotos,
+            ];
+        }
+
 
         return $this->render('compte/show.html.twig', [
             'compte' => $compte,
             'abonne' => $abonne,
-            'donneesPhoto' => $donneesPhoto != null ? base64_encode($donneesPhoto) : $donneesPhoto,
-            'format' => $format != null ? $format->getNom() : $format,
+            'donneesPhotoProfil' => $donneesPhotoProfil != null ? base64_encode($donneesPhotoProfil) : $donneesPhotoProfil,
+            'formatPhotoProfil' => $formatPhotoProfil != null ? $formatPhotoProfil->getNom() : $formatPhotoProfil,
             'nbAbonnements' => $nbAbonnements,
             'nbAbonnes' => $nbAbonnes,
             'nbPost' => $nbPost,
-            'posts' => $posts,
+            'posts' => $postsWithPhotos,
         ]);
     }
     
