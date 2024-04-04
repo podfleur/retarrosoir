@@ -38,6 +38,7 @@
                 </form>
 
                 <div>
+                    <a href="{{ path('app_post_new') }}" class="btn btn-dark me-3"><i class="fa-solid fa-plus"></i></a>
                     <a href="{{ path('app_compte_show', {'id': app.user.id}) }}" class="btn btn-dark me-3"><i class="fa-solid fa-user"></i></a>
                     <a href="{{ path('app_logout') }}" class="btn btn-danger"><i class="fa-solid fa-right-from-bracket"></i></a>
                 </div>
