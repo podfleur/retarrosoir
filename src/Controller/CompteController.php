@@ -8,6 +8,7 @@ use App\Entity\Signalement;
 use App\Entity\Photo;
 use App\Entity\Format;
 use App\Entity\Post;
+use App\Entity\Like;
 use App\Entity\PostPhoto;
 use App\Form\CompteType;
 use App\Repository\CompteRepository;
@@ -74,6 +75,7 @@ class CompteController extends AbstractController
             $compte->setPassword($hasher->hashPassword($compte, $compte->getPassword()));
             $compte->setRoles(['ROLE_USER']);
             $compte->setSuspendu(false);
+            $compte->setDateCreation(new \DateTime('now'));
 
             $entityManager->persist($compte);
             $entityManager->flush();
@@ -93,8 +95,8 @@ class CompteController extends AbstractController
         // Vérifier si le compte connecté est abonné au compte affiché uniquement si le compte n'est pas le sien
         $user = $this->getUser();
         $abonne = false;
-        $donneesPhoto = null;
-        $format = null;
+        $donneesPhotoProfil = null;
+        $formatPhotoProfil = null;
 
         // Je dois récupérer la photo de profil
         $photo = $compte->getPhotoId();
@@ -145,6 +147,7 @@ class CompteController extends AbstractController
             $postsWithPhotos[] = [
                 'post' => $post,
                 'photos' => $postPhotos,
+                'nb_likes' => count($em->getRepository(Like::class)->findBy(['post_id' => $post])),
             ];
         }
 

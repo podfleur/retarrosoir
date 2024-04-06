@@ -6,6 +6,7 @@ use App\Entity\Post;
 use App\Entity\Photo;
 use App\Entity\Compte;
 use App\Entity\Format;
+use App\Entity\Like;
 use App\Entity\PostPhoto;
 use App\Form\PostType;
 use App\Repository\PostRepository;
@@ -14,6 +15,8 @@ use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
+use Symfony\Component\Security\Core\User\UserInterface;
+use Symfony\Component\HttpFoundation\JsonResponse;
 
 #[Route('/post')]
 class PostController extends AbstractController
@@ -30,6 +33,7 @@ class PostController extends AbstractController
     public function new(Request $request, EntityManagerInterface $entityManager): Response
     {
         $post = new Post();
+        $post->setDatePublication(new \DateTime('now'));
         $form = $this->createForm(PostType::class, $post);
         $form->handleRequest($request);
         $post->setCompteId($this->getUser());
@@ -98,10 +102,21 @@ class PostController extends AbstractController
 
             }
 
+            $heures = $request->get('heures_retard');
+            $minutes = $request->get('minutes_retard');
+            
+            $tempsRetardEnMinutes = $heures * 60 + $minutes;
+
+            $post->setTempsRetard($tempsRetardEnMinutes);
+
             $entityManager->persist($post);
             $entityManager->flush();
 
-            return $this->redirectToRoute('app_compte_show', ['id' => $this->getUser()->getUserIdentifier()], Response::HTTP_SEE_OTHER);
+            // utilisateur connecté
+            $user = $this->getUser();
+            $compte = $entityManager->getRepository(Compte::class)->findOneBy(['id' => $user]);
+
+            return $this->redirectToRoute('app_compte_show', ['id' => $compte->getId()], Response::HTTP_SEE_OTHER);
         }
 
         return $this->render('post/new.html.twig', [
@@ -125,6 +140,65 @@ class PostController extends AbstractController
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
+
+            // On vérifie qu'il n'y ait pas de nouvelles images ou bien qu'elles soient supprimées ou modifiées
+            if ($form->get('data')->getData() != null) {
+                
+                $photos = $form->get('data')->getData();
+
+                // On vérifie s'il y a une ou plusieurs photos
+                if (is_array($photos)) {
+                    foreach ($photos as $photographie) {
+                        $photo = new Photo();
+                        $postPhoto = new PostPhoto();
+                        $photo->setDonneesPhoto(file_get_contents($photographie->getRealPath()));
+                        $postPhoto->setPhotoId($photo);
+                        $postPhoto->setPostId($post);
+                        $entityManager->persist($postPhoto);
+
+                        // On récupère le ou les type(s) des photos
+                        $type = $photographie->getMimeType();
+
+                        // On ajoute un nouveau format pour la photo si il n'existe pas sinon on récupère le format existant et on attribue à la photo l'id du format
+                        $format = $entityManager->getRepository(Format::class)->findOneBy(['nom' => $type]);
+                        if ($format === null) {
+                            $format = new Format();
+                            $format->setNom($type);
+                            $entityManager->persist($format);
+                            $photo->setFormatId($format);
+                        } else {
+                            $photo->setFormatId($format);
+                        }
+
+                        $entityManager->persist($photo);
+
+                    }
+                } else {
+                    $photo = new Photo();
+                    $postPhoto = new PostPhoto();
+                    $photo->setDonneesPhoto(file_get_contents($form->get('data')->getData()));
+                    $postPhoto->setPhotoId($photo);
+                    $postPhoto->setPostId($post);
+                    $entityManager->persist($postPhoto);
+
+                    // On récupère le type de la photo
+                    $type = $form->get('data')->getData()->getMimeType();
+
+                    // On ajoute un nouveau format pour la photo si il n'existe pas sinon on récupère le format existant et on attribue à la photo l'id du format
+                    $format = $entityManager->getRepository(Format::class)->findOneBy(['nom' => $type]);
+                    if ($format === null) {
+                        $format = new Format();
+                        $format->setNom($type);
+                        $entityManager->persist($format);
+                        $photo->setFormatId($format);
+                    } else {
+                        $photo->setFormatId($format);
+                    }
+
+                    $entityManager->persist($photo);
+                }
+            }
+
             $entityManager->flush();
 
             return $this->redirectToRoute('app_post_index', [], Response::HTTP_SEE_OTHER);
@@ -165,4 +239,49 @@ class PostController extends AbstractController
 
         return $this->redirectToRoute('app_compte_show', ['id' => $compte->getId()], Response::HTTP_SEE_OTHER);
     }
+
+    // On crée une route pour liker un post
+    #[Route('/like/{id}', name: 'app_post_like', methods: ['GET'])]
+    public function like(Post $post, EntityManagerInterface $entityManager): Response
+    {
+        $user = $this->getUser();
+        $compte = $entityManager->getRepository(Compte::class)->findOneBy(['id' => $user]);
+        // On récupère le like associé au post et au compte
+        $like = $entityManager->getRepository(Like::class)->findOneBy(['post_id' => $post, 'compte_id' => $compte]);
+
+        if ($like === null) {
+            $nouveauLike = new Like();
+            $nouveauLike->setGolden(false);
+            $nouveauLike->setPostId($post);
+            $nouveauLike->setCompteId($compte);
+            $entityManager->persist($nouveauLike);
+        }
+        $entityManager->flush();
+
+        // On renvoie le nombre de like à l'aide de la fonction count
+        $likes = count($entityManager->getRepository(Like::class)->findBy(['post_id' => $post]));
+
+        return new JsonResponse(['nb_like' => $likes]);
+    }
+
+    // On crée une route pour unliker un post
+    #[Route('/unlike/{id}', name: 'app_post_unlike', methods: ['GET'])]
+    public function unlike(Post $post, EntityManagerInterface $entityManager): Response
+    {
+        $user = $this->getUser();
+        $compte = $entityManager->getRepository(Compte::class)->findOneBy(['id' => $user]);
+        // On récupère le like associé au post et au compte
+        $like = $entityManager->getRepository(Like::class)->findOneBy(['post_id' => $post, 'compte_id' => $compte]);
+
+        if ($like !== null) {
+            $entityManager->remove($like);
+        }
+        $entityManager->flush();
+
+        // On renvoie le nombre de like à l'aide de la fonction count
+        $likes = count($entityManager->getRepository(Like::class)->findBy(['post_id' => $post]));
+
+        return new JsonResponse(['nb_like' => $likes]);
+    }
+
 }
