@@ -8,6 +8,7 @@ use App\Entity\Signalement;
 use App\Entity\Photo;
 use App\Entity\Format;
 use App\Entity\Post;
+use App\Entity\Like;
 use App\Entity\PostPhoto;
 use App\Form\CompteType;
 use App\Repository\CompteRepository;
@@ -74,6 +75,7 @@ class CompteController extends AbstractController
             $compte->setPassword($hasher->hashPassword($compte, $compte->getPassword()));
             $compte->setRoles(['ROLE_USER']);
             $compte->setSuspendu(false);
+            $compte->setDateCreation(new \DateTime('now'));
 
             $entityManager->persist($compte);
             $entityManager->flush();
@@ -93,8 +95,8 @@ class CompteController extends AbstractController
         // Vérifier si le compte connecté est abonné au compte affiché uniquement si le compte n'est pas le sien
         $user = $this->getUser();
         $abonne = false;
-        $donneesPhoto = null;
-        $format = null;
+        $donneesPhotoProfil = null;
+        $formatPhotoProfil = null;
 
         // Je dois récupérer la photo de profil
         $photo = $compte->getPhotoId();
@@ -124,7 +126,7 @@ class CompteController extends AbstractController
         $nbPost = count($em->getRepository(Post::class)->findBy(['compte_id' => $compte]));
         
         // On récupère les photos de posts associés au profil sachant que l'utilisateur est dans la table compte, les photos dans la tables photo, les posts dans la table post, les formats dans la table format et les photos de post dans la table post_photo
-        $posts = $em->getRepository(Post::class)->findBy(['compte_id' => $compte]);
+        $posts = $em->getRepository(Post::class)->findBy(['compte_id' => $compte], ['date_publication' => 'DESC']);
         $postsWithPhotos = [];
 
         foreach ($posts as $post) {
@@ -145,6 +147,7 @@ class CompteController extends AbstractController
             $postsWithPhotos[] = [
                 'post' => $post,
                 'photos' => $postPhotos,
+                'nb_likes' => count($em->getRepository(Like::class)->findBy(['post_id' => $post])),
             ];
         }
 

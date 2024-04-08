@@ -1,12 +1,108 @@
 {% extends 'base.html.twig' %}
 
-{% block title %}Retarrosoir{% endblock %}
+{% block title %}Accueil{% endblock %}
 
 {% block body %}
+    <div class="container mt-5">
+        <h1 class="text-center mb-3">Accueil</h1>
 
-<div class="add-post">
-    <h2>Ajouter un post</h2>
-    <a href="{{ path('app_post_new') }}" class="btn btn-primary">Ajouter un post</a>
-</div>
+        {% if posts is empty %}
+            <div class="alert alert-info" role="alert">
+                Aucun post disponible.
+            </div>
+        {% else %}
+            {% for post in posts %}
+                <div class="card mb-3">
+                    {% if post.photos is not empty %}
+                        <div class="card-body">
+                            {% for photo in post.photos %}
+                                <img src="data:image/{{ photo.format }};base64,{{ photo.donneesPhoto }}" alt="Photo de profil" width="200" height="200" class="ratio ratio-1x1 object-fit-contain">
+                            {% endfor %}
+                        </div>
+                    {% endif %}
 
+                    <div class="card-body">
+                        <h5 class="card-title">{{ post.post.titre }}</h5>
+                        <p class="card-text">{{ post.post.description }}</p>
+                        <p>{{ (post.post.tempsRetard // 60) ~ 'h' }}{{ post.post.tempsRetard % 60 ~ 'min' }} de retard</p>
+                        
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div class="d-flex justify-content-center align-items-center">
+                                <div class="d-flex justify-content-center align-items-center flex-column">
+                                    <button class="btn like-button" data-id="{{ post.post.id }}" data-action-url="{{ path('app_post_like', {'id': post.post.id}) }}"><i class="fa-regular fa-heart"></i></button>
+                                    <button class="btn unlike-button" data-id="{{ post.post.id }}" data-action-url="{{ path('app_post_unlike', {'id': post.post.id}) }}" style="display: none"><i class="fa-solid fa-heart"></i></button>
+                                    <span class="like-count">{{ post.nb_likes }}</span>
+                                </div>
+                                <button class="btn btn-danger golden-like-button" data-id="{{ post.post.id }}" data-action-url="{{ path('app_post_golden_like', {'id': post.post.id}) }}"><i class="fa-regular fa-heart"></i></button>
+                            </div>
+
+                            <div class="d-flex justify-content-center align-items-center">
+                                <span class="btn open-commentaire" data-id="{{ post.post.id }}"><i class="fa-regular fa-comment"></i></span>
+                            </div>
+                        </div>
+
+                        <div id="commentaires-{{ post.post.id }}" style="display: none">
+                            <hr>
+                            <div class="mb-3">
+                                <div class="input-group">
+                                    <input name="commentaire" type="text" class="form-control" id="add-input-commentaire-{{ post.post.id }}" placeholder="Écrivez ici...">
+                                    <input type="hidden" name="post_id" value="{{ post.post.id }}">
+                                    <button data-id="{{ post.post.id }}" class="btn btn-primary add-commentaire">Commenter</button>
+                                </div>
+                            </div>
+
+                            <div id="liste-commentaires-{{ post.post.id }}"></div>
+                        </div>
+                    </div>
+                </div>
+            {% endfor %}
+        {% endif %}
+    </div>
+{% endblock %}
+
+{% block javascripts %}
+<script>
+$(document).ready(() => {
+    $('.add-commentaire').click(function(e) {
+        let id = $(this).data('id'); // Récupère l'id du post à commenter
+        let commentaire = $(`#add-input-commentaire-${id}`).val(); // Récupère le commentaire à ajouter
+    
+        // Envoie une requête AJAX pour ajouter un commentaire
+        $.ajax({
+            url: '/commentaire/new',
+            type: 'POST',
+            data: {
+                id: id,
+                commentaire: commentaire
+            },
+            success: function(response) {
+                console.log(response);
+    
+                // Réinitialise le champ de commentaire
+                $(`#add-input-commentaire-${id}`).val('');
+
+                // Met à jour la liste des commentaires
+                let commentaires = response.commentaires;
+
+                // On vide la div
+                $(`#liste-commentaires-${id}`).empty();
+
+                // On ajoute les commentaires
+                commentaires.forEach(commentaire => {
+                    $(`#liste-commentaires-${id}`).append(`
+                        <div class="d-flex justify-content-between align-items-center">
+                            <p>${commentaire.date}</p>
+                            <p>${commentaire.commentaire}</p>
+                        </div>
+                    `);
+                });
+
+            },
+            error: function(xhr, status, error) {
+                console.error(error); // Gère les erreurs éventuelles
+            }
+        });
+    });
+});
+</script>
 {% endblock %}
