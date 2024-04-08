@@ -11,6 +11,13 @@ use App\Entity\Compte;
 use App\Entity\Hashtag;
 use App\Entity\Abonnement;
 use App\Entity\Etablissement;
+use App\Entity\Post;
+use App\Entity\Photo;
+use App\Entity\Format;
+use App\Entity\PostPhoto;
+use App\Entity\Like;
+use App\Entity\Commentaire;
+use App\Entity\Signalement;
 use Symfony\Component\Security\Core\User\UserInterface;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\JsonResponse;
@@ -18,20 +25,60 @@ use Symfony\Component\HttpFoundation\JsonResponse;
 
 class HomeController extends AbstractController
 {
+    
     #[Route('/', name: 'app_home')]
-    public function index(Request $request, EntityManagerInterface $em, UserPasswordHasherInterface $hasher): Response
+    public function index(EntityManagerInterface $em): Response
     {
+        // Vérifier si le compte connecté est abonné au compte affiché uniquement si le compte n'est pas le sien
 
-        $this->denyAccessUnlessGranted('ROLE_USER');
-
-        // Je veux renvoyer le compte de l'utilisateur connecté
         $compte = $this->getUser();
+        $comptes = $em->getRepository(Compte::class)->findAll();
+
+        // On parcourt tous les comptes pour récupérer leurs posts
+        foreach ($comptes as $compte) {
+            $posts = $em->getRepository(Post::class)->findBy(['compte_id' => $compte], ['date_publication' => 'DESC']);
+            $compte->posts = $posts;
+        }
+
+        // Je dois récupérer la photo de profil
+        $photo = $compte->getPhotoId();
+        
+        // On récupère les photos de posts associés au profil sachant que l'utilisateur est dans la table compte, les photos dans la tables photo, les posts dans la table post, les formats dans la table format et les photos de post dans la table post_photo
+        $posts = $em->getRepository(Post::class)->findBy(['compte_id' => $compte], ['date_publication' => 'DESC']);
+        $postsWithPhotos = [];
+
+        foreach ($posts as $post) {
+
+            $postPhotos = [];
+            $postPhotosEntities = $em->getRepository(PostPhoto::class)->findBy(['post_id' => $post]);
+            foreach ($postPhotosEntities as $postPhoto) {
+                $photo = $postPhoto->getPhotoId();
+                $donneesPhoto = base64_encode(stream_get_contents($photo->getDonneesPhoto()));
+                $format = $photo->getFormatId()->getNom();
+                $postPhotos[] = [
+                    'donneesPhoto' => $donneesPhoto,
+                    'format' => $format,
+                ];
+            }
+
+            // Ajoutez à la liste des posts avec leurs photos
+            $postsWithPhotos[] = [
+                'post' => $post,
+                'photos' => $postPhotos,
+                'nb_likes' => count($em->getRepository(Like::class)->findBy(['post_id' => $post])),
+            ];
+        }
+
+        $nbPost = count($posts);
+
 
         return $this->render('home/index.html.twig', [
-            'controller_name' => 'HomeController',
-            'compte' => $compte
+            'compte' => $compte,
+            'posts' => $postsWithPhotos,
+            'nbPost' => $nbPost,
         ]);
     }
+
 
     // Je veux créer une route pour rechercher un #, un compte ou un établissement
     #[Route('/search', name: 'app_search')]

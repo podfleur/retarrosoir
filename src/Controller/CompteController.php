@@ -126,7 +126,7 @@ class CompteController extends AbstractController
         $nbPost = count($em->getRepository(Post::class)->findBy(['compte_id' => $compte]));
         
         // On récupère les photos de posts associés au profil sachant que l'utilisateur est dans la table compte, les photos dans la tables photo, les posts dans la table post, les formats dans la table format et les photos de post dans la table post_photo
-        $posts = $em->getRepository(Post::class)->findBy(['compte_id' => $compte]);
+        $posts = $em->getRepository(Post::class)->findBy(['compte_id' => $compte], ['date_publication' => 'DESC']);
         $postsWithPhotos = [];
 
         foreach ($posts as $post) {
