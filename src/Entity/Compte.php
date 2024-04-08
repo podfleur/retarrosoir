@@ -49,6 +49,9 @@ class Compte implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\Column]
     private ?bool $suspendu = null;
 
+    #[ORM\Column(type: Types::DATETIME_MUTABLE)]
+    private ?\DateTimeInterface $date_creation = null;
+
     public function getId(): ?int
     {
         return $this->id;
@@ -199,6 +202,18 @@ class Compte implements UserInterface, PasswordAuthenticatedUserInterface
     public function setSuspendu(bool $suspendu): static
     {
         $this->suspendu = $suspendu;
+
+        return $this;
+    }
+
+    public function getDateCreation(): ?\DateTimeInterface
+    {
+        return $this->date_creation;
+    }
+
+    public function setDateCreation(\DateTimeInterface $date_creation): static
+    {
+        $this->date_creation = $date_creation;
 
         return $this;
     }

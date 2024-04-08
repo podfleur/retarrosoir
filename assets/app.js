@@ -29,4 +29,56 @@ $(document).ready(function() {
         $('#search-bar').val('');
         $('#clear-input').hide();
     })
+
+    $('.like-button, .unlike-button').click(function(e) {
+    
+        var actionUrl = $(this).data('action-url'); // Récupère l'URL de l'action à effectuer (like ou unlike)
+        var likeButton = $(this); // Stocke une référence au bouton de like
+
+        console.log(actionUrl)
+    
+        // Envoie une requête AJAX pour liker ou déliker le post
+        $.ajax({
+            url: actionUrl,
+            type: 'GET',
+            success: function(response) {
+                var nbLikes = response.nb_like; // Récupère le nombre de likes du post depuis la réponse AJAX
+                var likeText = nbLikes > 1 ? ' likes' : ' like'; // Détermine le texte à afficher en fonction du nombre de likes
+    
+                // Met à jour le nombre de likes affiché
+                likeButton.siblings('.like-count').text(nbLikes + likeText);
+    
+                // Affiche le bouton liker ou unliker en fonction de l'action effectuée
+                if (likeButton.hasClass('like-button')) {
+                    likeButton.hide();
+                    likeButton.siblings('.unlike-button').show();
+                } else {
+                    likeButton.hide();
+                    likeButton.siblings('.like-button').show();
+                }
+            },
+            error: function(xhr, status, error) {
+                console.error(error); // Gère les erreurs éventuelles
+            }
+        });
+    });
+
+    $('.golden-like-button').click(function(e) {
+        
+            var actionUrl = $(this).data('action-url'); // Récupère l'URL de l'action à effectuer (like ou unlike)
+            var likeButton = $(this); // Stocke une référence au bouton de like
+        
+            // Envoie une requête AJAX pour liker ou déliker le post
+            $.ajax({
+                url: actionUrl,
+                type: 'GET',
+                success: function(response) {
+                    console.log(response)
+                },
+                error: function(xhr, status, error) {
+                    console.error(error); // Gère les erreurs éventuelles
+                }
+            });
+        })
+    
 })
