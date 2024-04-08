@@ -139,6 +139,22 @@ class PostController extends AbstractController
         $form = $this->createForm(PostType::class, $post);
         $form->handleRequest($request);
 
+        // On récupère les photos associées au post
+        $postPhotos = $entityManager->getRepository(PostPhoto::class)->findBy(['post_id' => $post]);
+
+        // On initialise un tableau pour stocker les objets Photo
+        $photos = [];
+
+        // Pour chaque PostPhoto, on ajoute l'objet Photo associé au tableau $photos
+        foreach ($postPhotos as $postPhoto) {
+            $photos[] = $postPhoto->getPhotoId();
+        }
+
+        // On encode les donneesPhoto en base64 pour les afficher dans le formulaire
+        foreach ($photos as $photo) {
+            $photo->setDonneesPhoto(base64_encode(stream_get_contents($photo->getDonneesPhoto())));
+        }
+
         if ($form->isSubmitted() && $form->isValid()) {
 
             // On vérifie qu'il n'y ait pas de nouvelles images ou bien qu'elles soient supprimées ou modifiées
@@ -207,6 +223,7 @@ class PostController extends AbstractController
         return $this->render('post/edit.html.twig', [
             'post' => $post,
             'form' => $form,
+            'photos' => $photos
         ]);
     }
 
@@ -282,6 +299,43 @@ class PostController extends AbstractController
         $likes = count($entityManager->getRepository(Like::class)->findBy(['post_id' => $post]));
 
         return new JsonResponse(['nb_like' => $likes]);
+    }
+
+    // On crée une route pour goldenliker un post
+    #[Route('/goldenlike/{id}', name: 'app_post_golden_like', methods: ['GET'])]
+    public function goldenLike(Post $post, EntityManagerInterface $entityManager): Response
+    {
+        $user = $this->getUser();
+
+        // On vérifie que le compte n'a pas super liké de post depuis plus d'une semaine ou qu'il n'a pas de golden like (il faut regarder le champ dernier_golden_like dans la table Compte)
+        $compte = $entityManager->getRepository(Compte::class)->findOneBy(['id' => $user]);
+        $like = $entityManager->getRepository(Like::class)->findOneBy(['post_id' => $post, 'compte_id' => $compte, 'golden' => true]);
+
+        if ($compte->getDernierGolddenLike() !== null) {
+            $date = new \DateTime('now');
+            $date->sub(new \DateInterval('P7D'));
+            if ($compte->getDernierGolddenLike() > $date) {
+                return new JsonResponse(['nb_like' => -1]);
+            }
+        } else {
+            $compte->setDernierGolddenLike(new \DateTime('now'));
+            $entityManager->persist($compte);
+        } 
+
+        if ($like == null) {
+            $nouveauLike = new Like();
+            $nouveauLike->setGolden(true);
+            $nouveauLike->setPostId($post);
+            $nouveauLike->setCompteId($compte);
+            $entityManager->persist($nouveauLike);
+        }
+
+        $entityManager->flush();
+
+        // On renvoie le nombre de like à l'aide de la fonction count
+        $likes = count($entityManager->getRepository(Like::class)->findBy(['post_id' => $post]));
+
+        return new JsonResponse(['nb_like' => $likes, 'compte' => $compte->getId(), 'like' => $like]);
     }
 
 }

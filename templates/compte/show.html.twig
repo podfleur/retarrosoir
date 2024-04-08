@@ -1,6 +1,6 @@
 {% extends 'base.html.twig' %}
 
-{% block title %}Compte{% endblock %}
+{% block title %}@{{ compte.username }}{% endblock %}
 
 {% block body %}
     <div class="container mt-5">
@@ -151,12 +151,28 @@
                             <h5 class="card-title">{{ p.post.titre }}</h5>
                             <p class="card-text">{{ p.post.description }}</p>
                             <p>{{ (p.post.tempsRetard // 60) ~ 'h' }}{{ p.post.tempsRetard % 60 ~ 'min' }} de retard</p>
+                            
+                            <div class="d-flex justify-content-between align-items-center">
+                                <div class="d-flex justify-content-center align-items-center">
+                                    <div class="d-flex justify-content-center align-items-center flex-column">
+                                        <button class="btn like-button" data-id="{{ p.post.id }}" data-action-url="{{ path('app_post_like', {'id': p.post.id}) }}"><i class="fa-regular fa-heart"></i></button>
+                                        <button class="btn unlike-button" data-id="{{ p.post.id }}" data-action-url="{{ path('app_post_unlike', {'id': p.post.id}) }}" style="display: none"><i class="fa-solid fa-heart"></i></button>
+                                        <span class="like-count">{{ p.nb_likes }}</span>
+                                    </div>
+                                    <button class="btn btn-danger golden-like-button" data-id="{{ p.post.id }}" data-action-url="{{ path('app_post_golden_like', {'id': p.post.id}) }}"><i class="fa-regular fa-heart"></i></button>
+                                </div>
 
-                            <button class="btn like-button" data-id="{{ p.post.id }}" data-action-url="{{ path('app_post_like', {'id': p.post.id}) }}"><i class="fa-regular fa-heart"></i></button>
-                            <button class="btn unlike-button" data-id="{{ p.post.id }}" data-action-url="{{ path('app_post_unlike', {'id': p.post.id}) }}" style="display: none"><i class="fa-solid fa-heart"></i></button>
+                                <div class="d-flex justify-content-center align-items-center">
+                                    <a href="" class="btn"><i class="fa-regular fa-comment"></i></a>
+                                </div>
 
-                            <span class="like-count">{{ p.nb_likes }}</span>
-                            <a href="" class="btn"><i class="fa-regular fa-comment"></i></a>
+                            </div>
+
+                            <div class="">
+
+
+                            </div>
+
                         </div>
                     </div>
                 {% endfor %}
