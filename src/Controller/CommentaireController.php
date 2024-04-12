@@ -35,12 +35,16 @@ class CommentaireController extends AbstractController
         $formattedCommentaires = [];
 
         foreach ($commentairesDuPost as $com) {
+
+            $username = $com->getCompteId()->getUsername();
+
             $formattedCommentaires[] = [
                 'id' => $com->getId(),
                 'commentaire' => $com->getTexte(),
                 'date' => $com->getDate()->format('Y-m-d H:i:s'),
-                'post_id' => $com->getPostId(),
-                'compte_id' => $com->getCompteId()
+                'post_id' => $com->getPostId()->getId(),
+                'compte_id' => $com->getCompteId()->getId(),
+                'username' => $username
             ];
         }
 
