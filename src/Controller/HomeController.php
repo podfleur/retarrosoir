@@ -128,8 +128,7 @@ class HomeController extends AbstractController
                 'suiveur_id' => $this->getUser(),
                 'suivi_personne_id' => $compte 
             ]);
-    
-            // Ajouter une nouvelle propriété à chaque compte pour indiquer s'il est abonné
+                // Ajouter une nouvelle propriété à chaque compte pour indiquer s'il est abonné
             $compte->isSubscribed = $isSubscribed ? true : false;
         }
 
@@ -139,18 +138,38 @@ class HomeController extends AbstractController
             ->getQuery()
             ->getResult();
 
+        foreach($hashtags as $h) {
+            $isSubscribed = $em->getRepository(Abonnement::class)->findOneBy([
+                'suiveur_id' => $this->getUser(),
+                'suivi_hashtag_id' => $h 
+            ]);
+
+            $h->isSubscribed = $isSubscribed ? true : false;
+        }
+
         $etablissements = $em->getRepository(Etablissement::class)->createQueryBuilder('e')
             ->where('e.nom LIKE :search')
             ->setParameter('search', '%' . $search . '%')
             ->getQuery()
             ->getResult();
 
+        foreach($etablissements as $e) {
+            $isSubscribed = $em->getRepository(Abonnement::class)->findOneBy([
+                'suiveur_id' => $this->getUser(),
+                'suivi_etablissement_id' => $e 
+            ]);
+
+            $e->isSubscribed = $isSubscribed ? true : false;
+        }
+        
+        $compteConnecte = $this->getUser();
 
         return $this->render('home/search.html.twig', [
             'controller_name' => 'HomeController',
             'comptes' => $comptes,
             'hashtags' => $hashtags,
             'etablissements' => $etablissements,
+            'compte' => $compteConnecte,
         ]);
     }
 

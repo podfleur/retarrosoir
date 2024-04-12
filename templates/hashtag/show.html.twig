@@ -6,7 +6,15 @@
 
     <div class="container w-100 d-flex justify-content-center align-items-center flex-column gap-4">
 
-    <h1>Posts pour #{{ hashtag.texte }}</h1>
+    <div class="d-flex justify-content-between align-items-center gap-5">
+        <h1>Posts pour #{{ hashtag.texte }}</h1>
+
+        {% if abonne %}
+            <a href="{{ path('app_hashtag_unsubscribe', {'id': hashtag.id}) }}" class="btn btn-sm btn-danger">Se désabonner</a>
+        {% else %}
+            <a href="{{ path('app_hashtag_subscribe', {'id': hashtag.id}) }}" class="btn btn-sm btn-primary">S'abonner</a>
+        {% endif %}
+    </div>
 
     {% if posts is empty %}
             <div class="alert alert-info" role="alert">
