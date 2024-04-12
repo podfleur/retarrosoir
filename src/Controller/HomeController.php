@@ -31,23 +31,26 @@ class HomeController extends AbstractController
     {
         // Vérifier si le compte connecté est abonné au compte affiché uniquement si le compte n'est pas le sien
 
+        // On vérifie si un compte est connecté, sinon on le redirige vers la page de connexion
+        $this->denyAccessUnlessGranted('ROLE_USER');
+
         $compte = $this->getUser();
-        $comptes = $em->getRepository(Compte::class)->findAll();
 
-        // On parcourt tous les comptes pour récupérer leurs posts
-        foreach ($comptes as $compte) {
-            $posts = $em->getRepository(Post::class)->findBy(['compte_id' => $compte], ['date_publication' => 'DESC']);
-            $compte->posts = $posts;
-        }
+        // Récupérer tous les posts qui ne sont pas à l'utilisateur connecté
+        $allPosts = $em->getRepository(Post::class)->findAll();
 
-        // Je dois récupérer la photo de profil
-        $photo = $compte->getPhotoId();
-        
-        // On récupère les photos de posts associés au profil sachant que l'utilisateur est dans la table compte, les photos dans la tables photo, les posts dans la table post, les formats dans la table format et les photos de post dans la table post_photo
-        $posts = $em->getRepository(Post::class)->findBy(['compte_id' => $compte], ['date_publication' => 'DESC']);
+        // On trie allPost par date de création décroissante
+        usort($allPosts, function($a, $b) {
+            return $b->getDatePublication() <=> $a->getDatePublication();
+        });
+
         $postsWithPhotos = [];
+        $allPhotoProfils = [];
 
-        foreach ($posts as $post) {
+        foreach ($allPosts as $post) {
+            // Récupérer la photo de profil pour chaque post
+            $photoProfil = $post->getCompteId()->getPhotoId() ? base64_encode(stream_get_contents($post->getCompteId()->getPhotoId()->getDonneesPhoto())) : null;
+            $formatPhotoProfil = $post->getCompteId()->getPhotoId() ? $post->getCompteId()->getPhotoId()->getFormatId()->getNom() : null;
 
             $postPhotos = [];
             $postPhotosEntities = $em->getRepository(PostPhoto::class)->findBy(['post_id' => $post]);
@@ -60,22 +63,34 @@ class HomeController extends AbstractController
                     'format' => $format,
                 ];
             }
-
+        
             // Ajoutez à la liste des posts avec leurs photos
             $postsWithPhotos[] = [
                 'post' => $post,
                 'photos' => $postPhotos,
                 'nb_likes' => count($em->getRepository(Like::class)->findBy(['post_id' => $post])),
+                'compte' => $post->getCompteId(),
+            ];
+
+            $allPhotoProfils[] = [
+                'photoProfil' => $photoProfil,
+                'formatPhotoProfil' => $formatPhotoProfil,
+                'id' => $post->getCompteId()->getId(),
             ];
         }
 
-        $nbPost = count($posts);
+        $nbPost = count($allPosts);
+
+        // On récupère les hashtags 
+        $hashtags = $em->getRepository(Hashtag::class)->findAll();
 
 
         return $this->render('home/index.html.twig', [
             'compte' => $compte,
             'posts' => $postsWithPhotos,
             'nbPost' => $nbPost,
+            'allPhotoProfils' => $allPhotoProfils,
+            'hashtags' => $hashtags,
         ]);
     }
 

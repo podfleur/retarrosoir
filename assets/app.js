@@ -107,9 +107,15 @@ $(document).ready(function() {
                 // On ajoute les commentaires
                 commentaires.forEach(commentaire => {
                     $(`#liste-commentaires-${id}`).append(`
-                        <div class="d-flex justify-content-between align-items-center">
-                            <p>${commentaire.date}</p>
-                            <p>${commentaire.commentaire}</p>
+                        <div class="d-flex justify-content-between align-items-center w-100 border-bottom gap-2">
+                            <div class="d-flex align-items-start justify-content-center flex-column ">
+                                <p class="fw-bold">@${commentaire.username}</p>
+                                <p>${commentaire.commentaire}</p>
+                            </div>
+                            <div class="d-flex align-items-center justify-content-center gap-2">
+                                <p class="h-100">${commentaire.date}</p>
+                                <a href="{{ deleteCommentaireUrl }}" class="delete-commentaire" data-id="${commentaire.id}"><i class="fa-solid fa-trash"></i></a>
+                            </div>
                         </div>
                     `);
                 });

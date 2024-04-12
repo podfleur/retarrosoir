@@ -3,11 +3,13 @@
 namespace App\Controller;
 
 use App\Entity\Post;
+use App\Entity\Hashtag;
 use App\Entity\Photo;
 use App\Entity\Compte;
 use App\Entity\Format;
 use App\Entity\Like;
 use App\Entity\PostPhoto;
+use App\Entity\PostHashtag;
 use App\Form\PostType;
 use App\Repository\PostRepository;
 use Doctrine\ORM\EntityManagerInterface;
@@ -39,6 +41,34 @@ class PostController extends AbstractController
         $post->setCompteId($this->getUser());
 
         if ($form->isSubmitted() && $form->isValid()) {
+
+            $body = $post->getDescription();
+            $hashtagsFromBody = [];
+            preg_match_all('/#(\w+)/', $body, $matches);
+            if (!empty($matches[1])) {
+                $hashtagsFromBody = array_unique($matches[1]);
+            }
+
+            $hashtagsRepository = $entityManager->getRepository(Hashtag::class);
+    
+            // Associez les hashtags au post
+            foreach ($hashtagsFromBody as $tag) {
+                // Recherchez le hashtag dans la base de données
+                $hashtag = $hashtagsRepository->findOneByTexte($tag);
+                if (!$hashtag) {
+                    // Si le hashtag n'existe pas, créez-le et associez-le au post
+                    $hashtag = new Hashtag();
+                    $postHashtag = new PostHashtag();
+                    $hashtag->setTexte($tag);
+                    $postHashtag->setPostId($post);
+                    $postHashtag->setHashtagId($hashtag);
+                    $entityManager->persist($hashtag);
+                    $entityManager->persist($postHashtag);
+                } else {
+                    // Si le hashtag existe, associez simplement le post au hashtag existant
+                    $hashtag->addPost($post);
+                }
+            }
 
             // On vérifie s'il y a une ou des photos, et si c'est le cas, on les ajoute 
             // dans la table photo et on ajoute de nouvelles données dans la table PostPhoto 
