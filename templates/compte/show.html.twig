@@ -74,26 +74,26 @@
 
                 <!-- Modal -->
                 <div class="modal fade" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
-                <div class="modal-dialog">
-                    <div class="modal-content">
-                    <div class="modal-header">
-                        <h1 class="modal-title fs-5" id="exampleModalLabel">Signaler le compte</h1>
-                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                    </div>
-                    <form action="{{ path('app_compte_signaler', {'id': compte.id}) }}">
-                        <div class="modal-body">
-                                <div class="mb-3">
-                                    <label for="exampleFormControlInput1" class="form-label">Raison du Signalement</label>
-                                    <textarea name="reportArea" type="text" class="form-control" id="exampleFormControlInput1" placeholder="Écrivez ici..."></textarea>
-                                </div>
+                    <div class="modal-dialog">
+                        <div class="modal-content">
+                        <div class="modal-header">
+                            <h1 class="modal-title fs-5" id="exampleModalLabel">Signaler le compte</h1>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                         </div>
-                        <div class="modal-footer">
-                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annuler</button>
-                            <button type="submit" class="btn btn-danger">Signaler</button>
+                        <form action="{{ path('app_compte_signaler', {'id': compte.id}) }}">
+                            <div class="modal-body">
+                                    <div class="mb-3">
+                                        <label for="exampleFormControlInput1" class="form-label">Raison du Signalement</label>
+                                        <textarea name="reportArea" type="text" class="form-control" id="exampleFormControlInput1" placeholder="Écrivez ici..."></textarea>
+                                    </div>
+                            </div>
+                            <div class="modal-footer">
+                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annuler</button>
+                                <button type="submit" class="btn btn-danger">Signaler</button>
+                            </div>
+                        </form>
                         </div>
-                    </form>
                     </div>
-                </div>
                 </div>
 
             </div>
@@ -229,9 +229,15 @@ $(document).ready(() => {
                 // On ajoute les commentaires
                 commentaires.forEach(commentaire => {
                     $(`#liste-commentaires-${id}`).append(`
-                        <div class="d-flex justify-content-between align-items-center">
-                            <p>${commentaire.date}</p>
-                            <p>${commentaire.commentaire}</p>
+                        <div class="d-flex justify-content-between align-items-center w-100 border-bottom gap-2">
+                            <div class="d-flex align-items-start justify-content-center flex-column ">
+                                <p class="fw-bold">@${commentaire.username}</p>
+                                <p>${commentaire.commentaire}</p>
+                            </div>
+                            <div class="d-flex align-items-center justify-content-center gap-2">
+                                <p class="h-100">${commentaire.date}</p>
+                                <a href="" class="delete-commentaire" data-id="${commentaire.id}"><i class="fa-solid fa-trash"></i></a>
+                            </div>
                         </div>
                     `);
                 });
