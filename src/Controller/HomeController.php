@@ -81,12 +81,16 @@ class HomeController extends AbstractController
 
         $nbPost = count($allPosts);
 
+        // On récupère les hashtags 
+        $hashtags = $em->getRepository(Hashtag::class)->findAll();
+
 
         return $this->render('home/index.html.twig', [
             'compte' => $compte,
             'posts' => $postsWithPhotos,
             'nbPost' => $nbPost,
             'allPhotoProfils' => $allPhotoProfils,
+            'hashtags' => $hashtags,
         ]);
     }
 
