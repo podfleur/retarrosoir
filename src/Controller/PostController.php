@@ -10,6 +10,8 @@ use App\Entity\Format;
 use App\Entity\Like;
 use App\Entity\PostPhoto;
 use App\Entity\PostHashtag;
+use App\Entity\Commentaire;
+use App\Entity\Signalement;
 use App\Form\PostType;
 use App\Repository\PostRepository;
 use Doctrine\ORM\EntityManagerInterface;
@@ -40,6 +42,9 @@ class PostController extends AbstractController
         $form->handleRequest($request);
         $post->setCompteId($this->getUser());
 
+        // On récupère l'URL dont on provient
+        $referer = $request->headers->get('referer');
+
         if ($form->isSubmitted() && $form->isValid()) {
 
             $body = $post->getDescription();
@@ -66,7 +71,10 @@ class PostController extends AbstractController
                     $entityManager->persist($postHashtag);
                 } else {
                     // Si le hashtag existe, associez simplement le post au hashtag existant
-                    $hashtag->addPost($post);
+                    $postHashtag = new PostHashtag();
+                    $postHashtag->setPostId($post);
+                    $postHashtag->setHashtagId($hashtag);
+                    $entityManager->persist($postHashtag);
                 }
             }
 
@@ -152,6 +160,7 @@ class PostController extends AbstractController
         return $this->render('post/new.html.twig', [
             'post' => $post,
             'form' => $form,
+            'referer' => $referer
         ]);
     }
 
@@ -186,6 +195,37 @@ class PostController extends AbstractController
         }
 
         if ($form->isSubmitted() && $form->isValid()) {
+
+            $body = $post->getDescription();
+            $hashtagsFromBody = [];
+            preg_match_all('/#(\w+)/', $body, $matches);
+            if (!empty($matches[1])) {
+                $hashtagsFromBody = array_unique($matches[1]);
+            }
+
+            $hashtagsRepository = $entityManager->getRepository(Hashtag::class);
+    
+            // Associez les hashtags au post
+            foreach ($hashtagsFromBody as $tag) {
+                // Recherchez le hashtag dans la base de données
+                $hashtag = $hashtagsRepository->findOneByTexte($tag);
+                if (!$hashtag) {
+                    // Si le hashtag n'existe pas, créez-le et associez-le au post
+                    $hashtag = new Hashtag();
+                    $postHashtag = new PostHashtag();
+                    $hashtag->setTexte($tag);
+                    $postHashtag->setPostId($post);
+                    $postHashtag->setHashtagId($hashtag);
+                    $entityManager->persist($hashtag);
+                    $entityManager->persist($postHashtag);
+                } else {
+                    // Si le hashtag existe, associez simplement le post au hashtag existant
+                    $postHashtag = new PostHashtag();
+                    $postHashtag->setPostId($post);
+                    $postHashtag->setHashtagId($hashtag);
+                    $entityManager->persist($postHashtag);
+                }
+            }
 
             // On vérifie qu'il n'y ait pas de nouvelles images ou bien qu'elles soient supprimées ou modifiées
             if ($form->get('data')->getData() != null) {
@@ -247,7 +287,11 @@ class PostController extends AbstractController
 
             $entityManager->flush();
 
-            return $this->redirectToRoute('app_post_index', [], Response::HTTP_SEE_OTHER);
+            // utilisateur connecté
+            $user = $this->getUser();
+            $compte = $entityManager->getRepository(Compte::class)->findOneBy(['id' => $user]);
+
+            return $this->redirectToRoute('app_compte_show', ['id' => $compte->getId()], Response::HTTP_SEE_OTHER);
         }
 
         return $this->render('post/edit.html.twig', [
@@ -274,6 +318,21 @@ class PostController extends AbstractController
                 $photos = $entityManager->getRepository(PostPhoto::class)->findBy(['post_id' => $post]);
                 foreach ($photos as $photo) {
                     $entityManager->remove($photo);
+                }
+
+                $commentaires = $entityManager->getRepository(Commentaire::class)->findBy(['post_id' => $post]);
+                foreach ($commentaires as $commentaire) {
+                    $entityManager->remove($commentaire);
+                }
+
+                $postHashtags = $entityManager->getRepository(PostHashtag::class)->findBy(['post_id' => $post]);
+                foreach ($postHashtags as $postHashtag) {
+                    $entityManager->remove($postHashtag);
+                }
+
+                $likes = $entityManager->getRepository(Like::class)->findBy(['post_id' => $post]);
+                foreach ($likes as $like) {
+                    $entityManager->remove($like);
                 }
                 
                 $entityManager->remove($post);
@@ -366,6 +425,33 @@ class PostController extends AbstractController
         $likes = count($entityManager->getRepository(Like::class)->findBy(['post_id' => $post]));
 
         return new JsonResponse(['nb_like' => $likes, 'compte' => $compte->getId(), 'like' => $like]);
+    }
+
+    #[Route('/signaler/{id}', name: 'app_post_signaler', methods: ['GET'])]
+    public function signaler($id, EntityManagerInterface $em, Request $request): Response
+    {
+        $compte = $em->getRepository(Compte::class)->find($id);
+
+        // Il faut ajouter un nouveau signalement
+        $signalement = new Signalement();
+        $signalement->setSignaleurId($this->getUser());
+        $signalement->setSignaleId($compte);
+
+        $motif = $request->query->get('reportArea');
+        $signalement->setMotif($motif);
+
+        $em->persist($signalement);
+        $em->flush();
+
+        // On vérifie que le compte n'a pas eu 10 signalement sinon il faut le suspendre
+        $nbSignalements = count($em->getRepository(Signalement::class)->findBy(['signale_id' => $compte]));
+
+        if ($nbSignalements >= 10) {
+            $compte->setSuspendu(true);
+            $em->flush();
+        }
+
+        return $this->redirectToRoute('app_compte_show', ['id' => $id]);
     }
 
 }

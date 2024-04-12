@@ -57,7 +57,7 @@ class HashtagController extends AbstractController
 
         // On trie allPost par date de création décroissante
         usort($posts, function($a, $b) {
-            return $b->getDatePublication() <=> $a->getDatePublication();
+            return $b->getId() <=> $a->getId();
         });
 
         $postsWithPhotos = [];
