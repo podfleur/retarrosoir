@@ -184,6 +184,8 @@ class PostController extends AbstractController
         // On initialise un tableau pour stocker les objets Photo
         $photos = [];
 
+        $referer = $request->headers->get('referer');
+
         // Pour chaque PostPhoto, on ajoute l'objet Photo associé au tableau $photos
         foreach ($postPhotos as $postPhoto) {
             $photos[] = $postPhoto->getPhotoId();
@@ -297,7 +299,8 @@ class PostController extends AbstractController
         return $this->render('post/edit.html.twig', [
             'post' => $post,
             'form' => $form,
-            'photos' => $photos
+            'photos' => $photos,
+            'referer' => $referer
         ]);
     }
 
@@ -430,12 +433,14 @@ class PostController extends AbstractController
     #[Route('/signaler/{id}', name: 'app_post_signaler', methods: ['GET'])]
     public function signaler($id, EntityManagerInterface $em, Request $request): Response
     {
-        $compte = $em->getRepository(Compte::class)->find($id);
+        $referer = $request->headers->get('referer');
+
+        $post = $em->getRepository(Post::class)->find($id);
 
         // Il faut ajouter un nouveau signalement
         $signalement = new Signalement();
         $signalement->setSignaleurId($this->getUser());
-        $signalement->setSignaleId($compte);
+        $signalement->setPostId($post);
 
         $motif = $request->query->get('reportArea');
         $signalement->setMotif($motif);
@@ -444,14 +449,14 @@ class PostController extends AbstractController
         $em->flush();
 
         // On vérifie que le compte n'a pas eu 10 signalement sinon il faut le suspendre
-        $nbSignalements = count($em->getRepository(Signalement::class)->findBy(['signale_id' => $compte]));
+        $nbSignalements = count($em->getRepository(Signalement::class)->findBy(['post_id' => $post]));
 
         if ($nbSignalements >= 10) {
-            $compte->setSuspendu(true);
+            $post->setSuspendu(true);
             $em->flush();
         }
 
-        return $this->redirectToRoute('app_compte_show', ['id' => $id]);
+        return $this->redirect($referer);
     }
 
 }
