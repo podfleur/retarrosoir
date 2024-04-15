@@ -33,6 +33,9 @@ class Post
     #[ORM\Column(type: Types::DATETIME_MUTABLE)]
     private ?\DateTimeInterface $date_publication = null;
 
+    #[ORM\Column]
+    private ?bool $suspendu = null;
+
     public function getId(): ?int
     {
         return $this->id;
@@ -113,6 +116,18 @@ class Post
     public function setDatePublication(\DateTimeInterface $date_publication): static
     {
         $this->date_publication = $date_publication;
+
+        return $this;
+    }
+
+    public function isSuspendu(): ?bool
+    {
+        return $this->suspendu;
+    }
+
+    public function setSuspendu(bool $suspendu): static
+    {
+        $this->suspendu = $suspendu;
 
         return $this;
     }
