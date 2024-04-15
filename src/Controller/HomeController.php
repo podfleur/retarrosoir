@@ -17,6 +17,7 @@ use App\Entity\Format;
 use App\Entity\PostPhoto;
 use App\Entity\Like;
 use App\Entity\Commentaire;
+use App\Entity\PostHashtag;
 use App\Entity\Signalement;
 use Symfony\Component\Security\Core\User\UserInterface;
 use Symfony\Component\HttpFoundation\Request;
@@ -83,6 +84,22 @@ class HomeController extends AbstractController
 
         // On récupère les hashtags 
         $hashtags = $em->getRepository(Hashtag::class)->findAll();
+
+        // On vérifie qu'il existe bien des posts pour chaque hashtags sinon on les supprime (en utilisant la table post_hashtag)
+        foreach ($hashtags as $key => $h) {
+
+            // On utilise le repository post_hashtag pour récupérer les posts associés à chaque hashtag
+            $posts = count($em->getRepository((PostHashtag::class))->findBy(['hashtag_id' => $h]));
+
+            if ($posts == 0) {
+                unset($hashtags[$key]);
+            }
+        }
+
+        // On compte le nombre de post par hashtag
+        foreach ($hashtags as $h) {
+            $h->nb_posts = count($em->getRepository((PostHashtag::class))->findBy(['hashtag_id' => $h]));
+        }
 
 
         return $this->render('home/index.html.twig', [
