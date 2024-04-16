@@ -4,6 +4,7 @@ namespace App\Controller;
 
 use App\Entity\Commentaire;
 use App\Entity\Post;
+use App\Entity\Compte;
 use App\Form\CommentaireType;
 use App\Repository\CommentaireRepository;
 use Doctrine\ORM\EntityManagerInterface;
@@ -120,12 +121,34 @@ class CommentaireController extends AbstractController
     #[Route('/{id}', name: 'app_commentaire_delete', methods: ['POST'])]
     public function delete(Request $request, Commentaire $commentaire, EntityManagerInterface $entityManager): Response
     {
-        if ($this->isCsrfTokenValid('delete'.$commentaire->getId(), $request->request->get('_token'))) {
+
+        $referer = $request->headers->get('referer');
+
+        $compte = $this->getUser();
+        $compte = $entityManager->getRepository(Compte::class)->findOneBy(['username' => $compte->getUserIdentifier()]);
+
+        if ($compte == $commentaire->getCompteId() || $compte == $commentaire->getPostId()->getCompteId()) {
             $entityManager->remove($commentaire);
             $entityManager->flush();
         }
+        // On vérifie si le commentaire appartient bien à l'utilisateur connecté ou s'il est admin ou si le commentaire appartient à un post appartenant à l'utilisateur connecté
+        else if ($compte != $commentaire->getCompteId() && $compte != $commentaire->getPostId()->getCompteId() || $compte != $commentaire->getPostId()->getCompteId()) {
+            return new JsonResponse(
+                [
+                    'error' => 'Vous n\'avez pas les droits pour supprimer ce commentaire', 
+                    'code' => 403,  
+                    'commentaire' => $commentaire->getId(), 
+                    'compte' => $compte->getId(),
+                    'commentaire_compte' => $commentaire->getCompteId()->getId(),
+                    'post_compte' => $commentaire->getPostId()->getCompteId()->getId()
+                ]
+            );
+        }
+        
+        $entityManager->remove($commentaire);
+        $entityManager->flush();
 
-        return $this->redirectToRoute('app_commentaire_index', [], Response::HTTP_SEE_OTHER);
+        return $this->redirect($referer);
     }
 
 }
