@@ -103,9 +103,11 @@ $(document).ready(function() {
                 // On vide le contenu actuel de la section des commentaires
                 $(`#liste-commentaires-${id}`).empty();
 
-                // On ajoute chaque commentaire à la section des commentaires
                 // On ajoute les commentaires
                 commentaires.forEach(commentaire => {
+
+                    let url = "/commentaire/" +  commentaire.id;
+
                     $(`#liste-commentaires-${id}`).append(`
                         <div class="d-flex justify-content-between align-items-center w-100 border-bottom gap-2">
                             <div class="d-flex align-items-start justify-content-center flex-column ">
@@ -114,7 +116,10 @@ $(document).ready(function() {
                             </div>
                             <div class="d-flex align-items-center justify-content-center gap-2">
                                 <p class="h-100">${commentaire.date}</p>
-                                <a href="{{ deleteCommentaireUrl }}" class="delete-commentaire" data-id="${commentaire.id}"><i class="fa-solid fa-trash"></i></a>
+                                <form method="post" action="${url}" onsubmit="return confirm('Are you sure you want to delete this item?');">
+                                    <input type="hidden" name="_token">
+                                    <button class="btn"><i class="fa-solid fa-trash"></i></button>
+                                </form>
                             </div>
                         </div>
                     `);
