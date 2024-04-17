@@ -131,6 +131,12 @@ class CompteController extends AbstractController
 
         foreach ($posts as $post) {
 
+            $estSuspendu = $post->isSuspendu();
+
+            if ($estSuspendu) {
+                continue;
+            }
+
             $postPhotos = [];
             $postPhotosEntities = $em->getRepository(PostPhoto::class)->findBy(['post_id' => $post]);
             foreach ($postPhotosEntities as $postPhoto) {
