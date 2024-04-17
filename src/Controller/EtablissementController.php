@@ -6,6 +6,10 @@ use App\Entity\Etablissement;
 use App\Entity\Format;
 use App\Entity\Photo;
 use App\Entity\Compte;
+use App\Entity\Post;
+use App\Entity\Signalement;
+use App\Entity\PostPhoto;
+use App\Entity\Like;
 use App\Entity\Abonnement;
 use App\Form\EtablissementType;
 use App\Repository\EtablissementRepository;
@@ -112,6 +116,55 @@ class EtablissementController extends AbstractController
             $abonne = true;
         }
 
+        // On recherche l'ensemble des post créé par des utilisateurs dont etablissement_id est égal à l'id de l'établissement
+        $comptes = $em->getRepository(Compte::class)->findBy(['etablissement_id' => $etablissement]);
+        $posts = [];
+        foreach ($comptes as $compte) {
+            $posts = array_merge($posts, $em->getRepository(Post::class)->findBy(['compte_id' => $compte]));
+        }
+
+        $postsWithPhotos = [];
+        $allPhotoProfils = [];
+
+        foreach ($posts as $post) {
+
+            $estSuspendu = $post->isSuspendu();
+
+            if ($estSuspendu) {
+                continue;
+            }
+
+            // Récupérer la photo de profil pour chaque post
+            $photoProfil = $post->getCompteId()->getPhotoId() ? base64_encode(stream_get_contents($post->getCompteId()->getPhotoId()->getDonneesPhoto())) : null;
+            $formatPhotoProfil = $post->getCompteId()->getPhotoId() ? $post->getCompteId()->getPhotoId()->getFormatId()->getNom() : null;
+
+            $postPhotos = [];
+            $postPhotosEntities = $em->getRepository(PostPhoto::class)->findBy(['post_id' => $post]);
+            foreach ($postPhotosEntities as $postPhoto) {
+                $photo = $postPhoto->getPhotoId();
+                $donneesPhoto = base64_encode(stream_get_contents($photo->getDonneesPhoto()));
+                $format = $photo->getFormatId()->getNom();
+                $postPhotos[] = [
+                    'donneesPhoto' => $donneesPhoto,
+                    'format' => $format,
+                ];
+            }
+        
+            // Ajoutez à la liste des posts avec leurs photos
+            $postsWithPhotos[] = [
+                'post' => $post,
+                'photos' => $postPhotos,
+                'nb_likes' => count($em->getRepository(Like::class)->findBy(['post_id' => $post])),
+                'compte' => $post->getCompteId(),
+            ];
+
+            $allPhotoProfils[] = [
+                'photoProfil' => $photoProfil,
+                'formatPhotoProfil' => $formatPhotoProfil,
+                'id' => $post->getCompteId()->getId(),
+            ];
+        }
+
         return $this->render('etablissement/show.html.twig', [
             'etablissement' => $etablissement,
             'donneesPhoto' => $donneesPhoto,
@@ -119,7 +172,10 @@ class EtablissementController extends AbstractController
             'compte' => $compte,
             'nbAbonnes' => $nbAbonnes,
             'nbCompteAssocie' => $nbCompteAssocie,
-            'abonne' => $abonne
+            'abonne' => $abonne,
+            'posts' => $postsWithPhotos,
+            'allPhotoProfils' => $allPhotoProfils,
+
         ]);
     }
 

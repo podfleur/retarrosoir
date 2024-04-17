@@ -49,6 +49,14 @@ class HomeController extends AbstractController
         $allPhotoProfils = [];
 
         foreach ($allPosts as $post) {
+
+            // On vérifie que le post n'est pas suspendu
+            $estSuspendu = $post->isSuspendu();
+
+            if ($estSuspendu) {
+                continue;
+            }
+
             // Récupérer la photo de profil pour chaque post
             $photoProfil = $post->getCompteId()->getPhotoId() ? base64_encode(stream_get_contents($post->getCompteId()->getPhotoId()->getDonneesPhoto())) : null;
             $formatPhotoProfil = $post->getCompteId()->getPhotoId() ? $post->getCompteId()->getPhotoId()->getFormatId()->getNom() : null;
