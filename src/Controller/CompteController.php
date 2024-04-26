@@ -10,6 +10,8 @@ use App\Entity\Photo;
 use App\Entity\Format;
 use App\Entity\Post;
 use App\Entity\Like;
+use App\Entity\PostHashtag;
+use App\Entity\Hashtag;
 use App\Entity\PostPhoto;
 use App\Form\CompteType;
 use App\Form\UpdateCompteType;
@@ -44,10 +46,41 @@ class CompteController extends AbstractController
 
         if ($form->isSubmitted() && $form->isValid()) {
 
+            if ($form->get('data')->getData() != null) {
+                $photo = $compte->getPhotoId();
+                if ($photo !== null) { // Vérifier si la photo est définie
+                    $photo->setDonneesPhoto(file_get_contents($form->get('data')->getData()));
+                    $entityManager->persist($photo);
+
+                } else {
+                    // La photo n'est pas définie, vous devez la créer
+                    $photo = new Photo();
+                    $photo->setDonneesPhoto(file_get_contents($form->get('data')->getData()));
+                    $entityManager->persist($photo);
+                    $compte->setPhotoId($photo);
+                }
+
+                // On récupère le type de la photo
+                $type = $form->get('data')->getData()->getMimeType();
+                    
+                // On ajoute un nouveau format pour la photo si il n'existe pas sinon on récupère le format existant et on attribue à la photo l'id du format
+                $format = $entityManager->getRepository(Format::class)->findOneBy(['nom' => $type]);
+
+                if (!$format) {
+                    $format = new Format();
+                    $format->setNom($type);
+                    $entityManager->persist($format);
+                }
+
+                $photo->setFormatId($format);
+                $compte->setPhotoId($photo);
+            }
+
             $compte->setUsername($compte->getUsername());
             $compte->setPassword($hasher->hashPassword($compte, $compte->getPassword()));
             $compte->setRoles(['ROLE_USER']);
             $compte->setSuspendu(false);
+            $compte->setDateCreation(new \DateTime('now'));
 
             $entityManager->persist($compte);
             $entityManager->flush();
@@ -67,15 +100,15 @@ class CompteController extends AbstractController
         // Vérifier si le compte connecté est abonné au compte affiché uniquement si le compte n'est pas le sien
         $user = $this->getUser();
         $abonne = false;
-        $donneesPhoto = null;
-        $format = null;
+        $donneesPhotoProfil = null;
+        $formatPhotoProfil = null;
 
         // Je dois récupérer la photo de profil
         $photo = $compte->getPhotoId();
 
         if ($photo) {
-            $format = $photo->getFormatId();
-            $donneesPhoto = stream_get_contents($photo->getDonneesPhoto());
+            $formatPhotoProfil = $photo->getFormatId();
+            $donneesPhotoProfil = stream_get_contents($photo->getDonneesPhoto());
         }
     
         if ($user !== null && $compte !== $user) {
@@ -89,17 +122,55 @@ class CompteController extends AbstractController
                 $abonne = true;
             }
         }
+
+        // On calcule le nombre d'abonnements et d'abonnés du compte
+        $nbAbonnements = count($em->getRepository(Abonnement::class)->findBy(['suiveur_id' => $compte]));
+        $nbAbonnes = count($em->getRepository(Abonnement::class)->findBy(['suivi_personne_id' => $compte]));
         
+        // On calcule le nombre de posts du compte
+        $nbPost = count($em->getRepository(Post::class)->findBy(['compte_id' => $compte]));
+        
+        // On récupère les photos de posts associés au profil sachant que l'utilisateur est dans la table compte, les photos dans la tables photo, les posts dans la table post, les formats dans la table format et les photos de post dans la table post_photo
+        $posts = $em->getRepository(Post::class)->findBy(['compte_id' => $compte], ['date_publication' => 'DESC']);
+        $postsWithPhotos = [];
+
+        foreach ($posts as $post) {
+
+            $postPhotos = [];
+            $postPhotosEntities = $em->getRepository(PostPhoto::class)->findBy(['post_id' => $post]);
+            foreach ($postPhotosEntities as $postPhoto) {
+                $photo = $postPhoto->getPhotoId();
+                $donneesPhoto = base64_encode(stream_get_contents($photo->getDonneesPhoto()));
+                $format = $photo->getFormatId()->getNom();
+                $postPhotos[] = [
+                    'donneesPhoto' => $donneesPhoto,
+                    'format' => $format,
+                ];
+            }
+
+            // Ajoutez à la liste des posts avec leurs photos
+            $postsWithPhotos[] = [
+                'post' => $post,
+                'photos' => $postPhotos,
+                'nb_likes' => count($em->getRepository(Like::class)->findBy(['post_id' => $post])),
+            ];
+        }
+
+
         return $this->render('compte/show.html.twig', [
             'compte' => $compte,
             'abonne' => $abonne,
-            'donneesPhoto' => $donneesPhoto != null ? base64_encode($donneesPhoto) : $donneesPhoto,
-            'format' => $format != null ? $format->getNom() : $format
+            'donneesPhotoProfil' => $donneesPhotoProfil != null ? base64_encode($donneesPhotoProfil) : $donneesPhotoProfil,
+            'formatPhotoProfil' => $formatPhotoProfil != null ? $formatPhotoProfil->getNom() : $formatPhotoProfil,
+            'nbAbonnements' => $nbAbonnements,
+            'nbAbonnes' => $nbAbonnes,
+            'nbPost' => $nbPost,
+            'posts' => $postsWithPhotos,
         ]);
     }
     
     #[Route('/{id}/edit', name: 'app_compte_edit', methods: ['GET', 'POST'])]
-    public function edit(Request $request, Compte $compte, EntityManagerInterface $entityManager, UserPasswordHasherInterface $hasher): Response
+    public function edit(Request $request, Compte $compte, EntityManagerInterface $entityManager, UserPasswordHasherInterface $hasher, $id): Response
     {
         $form = $this->createForm(UpdateCompteType::class, $compte);
         $form->handleRequest($request);

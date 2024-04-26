@@ -1,0 +1,12 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Modifier un Post{% endblock %}
+
+{% block body %}
+    <div class="container">
+        <h1>Modifier un Post</h1>
+
+        {{ include('post/_form.html.twig', {'button_label': 'Modifier'}) }}
+        <a class="btn btn-danger" href="{{ referer }}">Retour</a>
+    </div>
+{% endblock %}

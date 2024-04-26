@@ -7,6 +7,7 @@ use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface;
 use Symfony\Component\Security\Core\User\UserInterface;
+use Doctrine\ORM\EntityManagerInterface;
 
 #[ORM\Entity(repositoryClass: CompteRepository::class)]
 class Compte implements UserInterface, PasswordAuthenticatedUserInterface
@@ -48,6 +49,9 @@ class Compte implements UserInterface, PasswordAuthenticatedUserInterface
 
     #[ORM\Column]
     private ?bool $suspendu = null;
+
+    #[ORM\Column(type: Types::DATETIME_MUTABLE)]
+    private ?\DateTimeInterface $date_creation = null;
 
     public function getId(): ?int
     {
@@ -201,5 +205,22 @@ class Compte implements UserInterface, PasswordAuthenticatedUserInterface
         $this->suspendu = $suspendu;
 
         return $this;
+    }
+
+    public function getDateCreation(): ?\DateTimeInterface
+    {
+        return $this->date_creation;
+    }
+
+    public function setDateCreation(\DateTimeInterface $date_creation): static
+    {
+        $this->date_creation = $date_creation;
+
+        return $this;
+    }
+
+    public function getPosts(EntityManagerInterface $em): array
+    {
+        return $em->getRepository(Post::class)->findBy(['compte_id' => $this->id]);
     }
 }

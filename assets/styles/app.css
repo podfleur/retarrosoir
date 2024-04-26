@@ -1,7 +1,44 @@
 :root {
-    --white: #fff,
-    --charcoal: #424B54,
-    --lemon: #E1CE7A,
-    --desert-sand: #EBCFB2,
-    --silver: #C5BAAF 
+    --white: #fff;
+    --charcoal: #424B54;
+    --lemon: #E1CE7A;
+    --desert-sand: #EBCFB2;
+    --silver: #C5BAAF;
+
+    --delft-blue: #3A405A;
+    --champagne-pink: #F9DEC9;
+    --powder-blue: #99B2DD;
+    --melon: #E9AFA3;
 }
+
+* {
+    font-family: 'Calibri', sans-serif;
+}
+
+body {
+    background-color: var(--white);
+}
+
+.btn-dark {
+    background-color: var(--charcoal) !important;
+    color: var(--white) !important;
+}
+
+.btn-danger {
+    background-color: var(--lemon) !important;
+    color: var(--charcoal) !important;
+    border: solid 1px var(--lemon) !important;
+}
+
+.btn-primary {
+    background-color: var(--charcoal) !important;
+    color: var(--lemon) !important;
+    border: solid 1px var(--charcoal) !important;
+
+}
+
+.text-bg-warning {
+    background-color: var(--lemon) !important;
+    color: var(--charcoal) !important;
+}
+

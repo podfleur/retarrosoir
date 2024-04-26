@@ -6,10 +6,18 @@
 
     {% for abonnement in abonnements %}
         <div class="card">
-            <div class="card-body">
-                <h5 class="card-title">{{ abonnement.getSuiviPersonneId().getUsername() }}</h5>
-                <a href="{{ path('app_compte_show', {'id': abonnement.getSuiviPersonneId().getId()}) }}" class="btn btn-primary">Voir</a>
-            </div>
+            {% if abonnement.getSuiviPersonneId() is not null %}
+                <div class="card-body">
+                    <h5 class="card-title">{{ abonnement.getSuiviPersonneId().getUsername() }}</h5>
+                    <a href="{{ path('app_compte_show', {'id': abonnement.getSuiviPersonneId().getId()}) }}" class="btn btn-primary">Voir</a>
+                </div>
+            {% elseif abonnement.getSuiviEtablissementId is not null %}
+                <div class="card-body">
+                    <h5 class="card-title">{{ abonnement.getSuiviEtablissementId().getNom() }}</h5>
+                    <a href="{{ path('app_etablissement_show', {'id': abonnement.getSuiviEtablissementId().getId()}) }}" class="btn btn-primary">Voir</a>
+                </div>
+            {% endif %}
+
         </div>
     {% endfor %}
 

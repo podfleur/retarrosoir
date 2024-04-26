@@ -1,9 +1,26 @@
 {{ form_start(form) }}
-    {{ form_widget(form) }}
+
+    {{ form_row(form.data) }}
+
+    <div class="d-flex justify-content-between align-items-center gap-3 w-100">
+        <div class="w-75">
+            {{ form_row(form.etablissement_id) }}
+        </div>
+        <a href="{{ path('app_etablissement_new') }}" class="btn btn-dark w-25">Nouveau</a>
+    </div>
+
+    {{ form_row(form.username) }}
+    {{ form_row(form.nom_affichage) }}
+    {{ form_row(form.email) }}
+    {{ form_row(form.password) }}
+    {{ form_row(form.biographie) }}
+
     <button class="btn btn-dark w-full">{{ button_label|default("S'inscrire") }}</button>
+    
     <div>
         {% if app.request.attributes.get('_route') == 'app_compte_new' %}
             <span class="mt-2">Déjà un compte ? <a href="{{ path('app_login') }}">Se connecter</a></span>
         {% endif %}
     </div>
+
 {{ form_end(form) }}

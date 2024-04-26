@@ -23,12 +23,18 @@ class Post
     #[ORM\Column(type: Types::DATETIME_MUTABLE)]
     private ?\DateTimeInterface $date = null;
 
-    #[ORM\Column(type: Types::DATETIME_MUTABLE)]
-    private ?\DateTimeInterface $temps_retard = null;
+    #[ORM\Column(type: Types::INTEGER)]
+    private ?int $temps_retard = null;
 
     #[ORM\ManyToOne]
     #[ORM\JoinColumn(nullable: false)]
     private ?Compte $compte_id = null;
+
+    #[ORM\Column(type: Types::DATETIME_MUTABLE)]
+    private ?\DateTimeInterface $date_publication = null;
+
+    #[ORM\Column]
+    private ?bool $suspendu = null;
 
     public function getId(): ?int
     {
@@ -78,12 +84,12 @@ class Post
         return $this;
     }
 
-    public function getTempsRetard(): ?\DateTimeInterface
+    public function getTempsRetard(): ?int
     {
         return $this->temps_retard;
     }
 
-    public function setTempsRetard(\DateTimeInterface $temps_retard): static
+    public function setTempsRetard(?int $temps_retard): static
     {
         $this->temps_retard = $temps_retard;
 
@@ -98,6 +104,30 @@ class Post
     public function setCompteId(?Compte $compte_id): static
     {
         $this->compte_id = $compte_id;
+
+        return $this;
+    }
+
+    public function getDatePublication(): ?\DateTimeInterface
+    {
+        return $this->date_publication;
+    }
+
+    public function setDatePublication(\DateTimeInterface $date_publication): static
+    {
+        $this->date_publication = $date_publication;
+
+        return $this;
+    }
+
+    public function isSuspendu(): ?bool
+    {
+        return $this->suspendu;
+    }
+
+    public function setSuspendu(bool $suspendu): static
+    {
+        $this->suspendu = $suspendu;
 
         return $this;
     }

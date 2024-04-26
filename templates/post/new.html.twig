@@ -1,0 +1,14 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Nouveau Post{% endblock %}
+
+{% block body %}
+
+    <div class="container">
+        <h1>Créer un Post</h1>
+
+        {{ include('post/_form.html.twig') }}
+
+        <a class="btn btn-secondary" href="{{ referer }}">Retour</a>
+    </div>
+{% endblock %}
