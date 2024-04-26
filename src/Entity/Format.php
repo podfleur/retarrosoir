@@ -13,7 +13,7 @@ class Format
     #[ORM\Column]
     private ?int $id = null;
 
-    #[ORM\Column(length: 10)]
+    #[ORM\Column(length: 11)]
     private ?string $nom = null;
 
     public function getId(): ?int

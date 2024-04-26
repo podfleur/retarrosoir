@@ -5,9 +5,14 @@ namespace App\Controller;
 use App\Entity\Compte;
 use App\Entity\Abonnement;
 use App\Entity\Signalement;
+use App\Entity\Commentaire;
 use App\Entity\Photo;
 use App\Entity\Format;
+use App\Entity\Post;
+use App\Entity\Like;
+use App\Entity\PostPhoto;
 use App\Form\CompteType;
+use App\Form\UpdateCompteType;
 use App\Repository\CompteRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -17,6 +22,7 @@ use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 use Symfony\Component\Security\Core\User\UserInterface;
 use Symfony\Component\HttpFoundation\File\File;
+use Symfony\Bundle\SecurityBundle\Security;
 
 #[Route('/compte')]
 class CompteController extends AbstractController
@@ -95,8 +101,13 @@ class CompteController extends AbstractController
     #[Route('/{id}/edit', name: 'app_compte_edit', methods: ['GET', 'POST'])]
     public function edit(Request $request, Compte $compte, EntityManagerInterface $entityManager, UserPasswordHasherInterface $hasher): Response
     {
-        $form = $this->createForm(CompteType::class, $compte);
+        $form = $this->createForm(UpdateCompteType::class, $compte);
         $form->handleRequest($request);
+
+        // On doit vérifier que le compte à modifier est le même que celui connecté
+        if ($compte !== $this->getUser()) {
+            return $this->redirectToRoute('app_home');
+        }
 
         // On doit récupérer le nouveau mot de passe
 
@@ -104,10 +115,26 @@ class CompteController extends AbstractController
 
             // Il faut modifier la photo de profil si elle a été modifiée
             if ($form->get('data')->getData() != null) {
-                $photo = $compte->getPhotoId();
-                $photo->setDonneesPhoto(file_get_contents($form->get('data')->getData()));
-                $entityManager->persist($photo);
                 
+                // Vérification si le compte a été supprimé pendant l'édition
+                if (!$entityManager->contains($compte)) {
+                    // Redirection vers la page de connexion si le compte a été supprimé
+                    return $this->redirectToRoute('app_login', [], Response::HTTP_SEE_OTHER);
+                }
+
+                $photo = $compte->getPhotoId();
+                if ($photo !== null) { // Vérifier si la photo est définie
+                    $photo->setDonneesPhoto(file_get_contents($form->get('data')->getData()));
+                    $entityManager->persist($photo);
+
+                } else {
+                    // La photo n'est pas définie, vous devez la créer
+                    $photo = new Photo();
+                    $photo->setDonneesPhoto(file_get_contents($form->get('data')->getData()));
+                    $entityManager->persist($photo);
+                    $compte->setPhotoId($photo);
+                }
+
                 // On récupère le type de la photo
                 $type = $form->get('data')->getData()->getMimeType();
                 
@@ -123,12 +150,14 @@ class CompteController extends AbstractController
                 $photo->setFormatId($format);
 
                 $compte->setPhotoId($photo);
+                
             }
 
             // Il faut modifier le mot de passe en le hashant
             $compte->setPassword($hasher->hashPassword($compte, $compte->getPassword()));
 
             $entityManager->flush();
+
 
             return $this->redirectToRoute('app_compte_show', ['id' => $compte->getId()], Response::HTTP_SEE_OTHER);
         }
@@ -140,14 +169,100 @@ class CompteController extends AbstractController
     }
 
     #[Route('/{id}', name: 'app_compte_delete', methods: ['POST'])]
-    public function delete(Request $request, Compte $compte, EntityManagerInterface $entityManager): Response
+    public function delete(Request $request, Compte $compte, EntityManagerInterface $entityManager, Security $security): Response
     {
         if ($this->isCsrfTokenValid('delete'.$compte->getId(), $request->request->get('_token'))) {
+
+            // On supprime tous les abonnements du compte
+            $abonnements = $entityManager->getRepository(Abonnement::class)->findBy(['suiveur_id' => $compte]);
+            foreach ($abonnements as $abonnement) {
+                $entityManager->remove($abonnement);
+            }
+
+            // On supprime tous les abonnements au compte
+            $abonnements = $entityManager->getRepository(Abonnement::class)->findBy(['suivi_personne_id' => $compte]);
+            foreach ($abonnements as $abonnement) {
+                $entityManager->remove($abonnement);
+            }
+
+            // On supprime tous les signalements du compte
+            $signalements = $entityManager->getRepository(Signalement::class)->findBy(['signale_id' => $compte]);
+            foreach ($signalements as $signalement) {
+                $entityManager->remove($signalement);
+            }
+
+            // On supprime tous les posts du compte
+            $posts = $entityManager->getRepository(Post::class)->findBy(['compte_id' => $compte]);
+            foreach ($posts as $post) {
+                $postPhotos = $entityManager->getRepository(PostPhoto::class)->findBy(['post_id' => $post]);
+                foreach ($postPhotos as $postPhoto) {
+                    $entityManager->remove($postPhoto);
+                }
+                
+                $postHashtags = $entityManager->getRepository(PostHashtag::class)->findBy(['post_id' => $post]);
+                foreach ($postHashtags as $postHashtag) {
+                    $entityManager->remove($postHashtag);
+                }
+                
+                $commentaires = $entityManager->getRepository(Commentaire::class)->findBy(['post_id' => $post]);
+                foreach ($commentaires as $commentaire) {
+                    $entityManager->remove($commentaire);
+                }
+
+                $likes = $entityManager->getRepository(Like::class)->findBy(['post_id' => $post]);
+                foreach ($likes as $like) {
+                    $entityManager->remove($like);
+                }
+
+                $signalements = $entityManager->getRepository(Signalement::class)->findBy(['post_id' => $post]);
+                foreach ($signalements as $signalement) {
+                    $entityManager->remove($signalement);
+                }
+                
+                $entityManager->remove($post);
+            }
+
+            // On supprime tous les likes du compte
+            $likes = $entityManager->getRepository(Like::class)->findBy(['compte_id' => $compte]);
+            foreach ($likes as $like) {
+                $entityManager->remove($like);
+            }
+
+            // On supprime tous les signalements
+            $signalements = $entityManager->getRepository(Signalement::class)->findBy(['signaleur_id' => $compte]);
+            $signalements += $entityManager->getRepository(Signalement::class)->findBy(['signale_id' => $compte]);
+            foreach ($signalements as $signalement) {
+                $entityManager->remove($signalement);
+            }
+
+            // On supprime tous les commentaires du compte
+            $commentaires = $entityManager->getRepository(Commentaire::class)->findBy(['compte_id' => $compte]);
+            $commentaires += $entityManager->getRepository(Commentaire::class)->findBy((['post_id' => $compte->getId()]));
+            foreach ($commentaires as $commentaire) {
+                $entityManager->remove($commentaire);
+            }
+
+            // On supprime la photo de profil
+            $photo = $compte->getPhotoId();
+            if ($photo) {
+                $entityManager->remove($photo);
+            }
+
+            // On supprime tous les commentaires du compte
+            $commentaires = $entityManager->getRepository(Commentaire::class)->findBy(['compte_id' => $compte]);
+            foreach ($commentaires as $commentaire) {
+                $entityManager->remove($commentaire);
+            }
+            
             $entityManager->remove($compte);
             $entityManager->flush();
+            
+            // On déconnecte le compte
+            $response = $security->logout(false);
+
         }
 
-        return $this->redirectToRoute('app_compte_index', [], Response::HTTP_SEE_OTHER);
+        return $this->redirectToRoute('app_login', [], Response::HTTP_SEE_OTHER);
     }
 
     // Je veux créer une route pour s'abonner à un compte
