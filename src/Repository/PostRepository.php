@@ -21,6 +21,15 @@ class PostRepository extends ServiceEntityRepository
         parent::__construct($registry, Post::class);
     }
 
+    // Fonction pour récupérer le nombre de post d'un compte
+    public function getPublications(int $idCompte): array {
+        return $this->createQueryBuilder('p')
+            ->where('p.compte_id = :idCompte')
+            ->setParameter('idCompte', $idCompte)
+            ->getQuery()
+            ->getResult();
+    }
+
 //    /**
 //     * @return Post[] Returns an array of Post objects
 //     */

@@ -21,6 +21,22 @@ class AbonnementRepository extends ServiceEntityRepository
         parent::__construct($registry, Abonnement::class);
     }
 
+    public function getAbonnes(int $idCompte): array {
+        return $this->createQueryBuilder('a')
+            ->where('a.suivi_personne_id = :idCompte')
+            ->setParameter('idCompte', $idCompte)
+            ->getQuery()
+            ->getResult();
+    }
+
+    public function getAbonnements(int $idCompte): array {
+        return $this->createQueryBuilder('a')
+            ->where('a.suiveur_id = :idCompte')
+            ->setParameter('idCompte', $idCompte)
+            ->getQuery()
+            ->getResult();
+    }
+
 //    /**
 //     * @return Abonnement[] Returns an array of Abonnement objects
 //     */

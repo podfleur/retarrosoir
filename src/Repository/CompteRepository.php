@@ -40,6 +40,14 @@ class CompteRepository extends ServiceEntityRepository implements PasswordUpgrad
         $this->getEntityManager()->flush();
     }
 
+    public function getAllAccounts(): array
+    {
+        return $this->createQueryBuilder('c')
+            ->getQuery()
+            ->getResult();
+    }
+
+
 //    /**
 //     * @return Compte[] Returns an array of Compte objects
 //     */

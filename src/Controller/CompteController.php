@@ -9,6 +9,8 @@ use App\Entity\Photo;
 use App\Entity\Format;
 use App\Entity\Post;
 use App\Entity\Like;
+use App\Entity\PostHashtag;
+use App\Entity\Hashtag;
 use App\Entity\PostPhoto;
 use App\Form\CompteType;
 use App\Repository\CompteRepository;
@@ -20,6 +22,8 @@ use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 use Symfony\Component\Security\Core\User\UserInterface;
 use Symfony\Component\HttpFoundation\File\File;
+use Symfony\Bundle\SecurityBundle\Security;
+use Symfony\Component\HttpFoundation\JsonResponse;
 
 #[Route('/compte')]
 class CompteController extends AbstractController
@@ -176,6 +180,8 @@ class CompteController extends AbstractController
         $form = $this->createForm(CompteType::class, $compte);
         $form->handleRequest($request);
 
+        $this->denyAccessUnlessGranted('ROLE_USER');
+
         // On doit vérifier que le compte à modifier est le même que celui connecté
         if ($compte !== $this->getUser()) {
             return $this->redirectToRoute('app_home');
@@ -207,9 +213,6 @@ class CompteController extends AbstractController
 
                 $compte->setPhotoId($photo);
             }
-
-            // Il faut modifier le mot de passe en le hashant
-            $compte->setPassword($hasher->hashPassword($compte, $compte->getPassword()));
 
             $entityManager->flush();
 
@@ -332,6 +335,35 @@ class CompteController extends AbstractController
 
         return $this->redirectToRoute('app_compte_show', ['id' => $id]);
     }
+
+    #[Route('/updatePassword', name: 'app_compte_update_password', methods: ['POST'])]
+    public function updatePassword(Request $request, EntityManagerInterface $em, UserPasswordHasherInterface $hasher, Security $security): Response
+    {
+        $this->denyAccessUnlessGranted('ROLE_USER');
+
+        $compte = $em->getRepository(Compte::class)->find($this->getUser());
+
+        $oldPassword = $request->request->get('oldPassword');
+        $newPassword = $request->request->get('newPassword');
+        $confirmPassword = $request->request->get('confirmPassword');
+
+        if ($newPassword !== $confirmPassword) {
+            return new JsonResponse(['error' => 'Passwords do not match'], Response::HTTP_UNPROCESSABLE_ENTITY);
+        }
+
+        if (!$hasher->isPasswordValid($compte, $oldPassword)) {
+            return new JsonResponse(['error' => 'Invalid old password'], Response::HTTP_UNPROCESSABLE_ENTITY);
+        }
+
+        $compte->setPassword($hasher->hashPassword($compte, $newPassword));
+        $em->flush();
+
+        // Log out the user
+        $response = $security->logout(false);
+
+        return new JsonResponse(['message' => 'Password updated successfully'], Response::HTTP_OK);
+    }
+
 
 
 }
