@@ -41,6 +41,7 @@ class PostController extends AbstractController
         $form = $this->createForm(PostType::class, $post);
         $form->handleRequest($request);
         $post->setCompteId($this->getUser());
+        $post->setSuspendu(false);
 
         // On récupère l'URL dont on provient
         $referer = $request->headers->get('referer');
