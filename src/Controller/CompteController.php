@@ -13,6 +13,7 @@ use App\Entity\PostHashtag;
 use App\Entity\Hashtag;
 use App\Entity\PostPhoto;
 use App\Form\CompteType;
+use App\Form\UpdateCompteType;
 use App\Repository\CompteRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -177,7 +178,7 @@ class CompteController extends AbstractController
     #[Route('/{id}/edit', name: 'app_compte_edit', methods: ['GET', 'POST'])]
     public function edit(Request $request, Compte $compte, EntityManagerInterface $entityManager, UserPasswordHasherInterface $hasher, $id): Response
     {
-        $form = $this->createForm(CompteType::class, $compte);
+        $form = $this->createForm(UpdateCompteType::class, $compte);
         $form->handleRequest($request);
 
         $this->denyAccessUnlessGranted('ROLE_USER');
@@ -359,7 +360,7 @@ class CompteController extends AbstractController
         $em->flush();
 
         // Log out the user
-        $response = $security->logout(false);
+        $security->logout(false);
 
         return new JsonResponse(['message' => 'Password updated successfully'], Response::HTTP_OK);
     }
