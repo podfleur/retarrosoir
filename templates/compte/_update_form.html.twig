@@ -15,7 +15,7 @@
     {{ form_row(form.biographie) }}
 
     {# On crée une div contenant 2 inputs permettant de changer le mot de passe #}
-    <details class="mb-3 card p-3">
+    {# <details class="mb-3 card p-3">
         <summary>Changer le mot de passe</summary>
 
         <form action="{{ path('app_compte_update_password') }}" method="post">
@@ -37,7 +37,7 @@
 
         </form>
 
-    </details>
+    </details> #}
 
     <button class="btn btn-dark w-full">{{ button_label|default("S'inscrire") }}</button>
     

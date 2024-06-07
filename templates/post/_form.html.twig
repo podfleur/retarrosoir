@@ -1,17 +1,6 @@
 {{ form_start(form) }}
     <form action="{{ path('app_post_new') }}">
 
-    <div class="d-flex justify-content-center align-items-center gap-5">
-    {% if app.request.attributes.get('_route') == 'app_post_edit' %}
-        {% for photo in photos %}
-            <div class="card d-flex flex-column justify-content-between align-items-center gap-3 h-100 p-4">
-                <img src="data:image/{{ photo.formatId.nom }};base64,{{ photo.donneesPhoto }}" alt="photo" width="200" class="">
-                <a class="btn btn-danger" href="">Supprimer</a>
-            </div>
-        {% endfor %}
-    {% endif %}
-    </div>
-
     {{ form_widget(form) }}
 
     <div class="d-flex justify-content-between align-items-center gap-5">
