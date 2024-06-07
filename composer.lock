@@ -4,11 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-<<<<<<< Updated upstream
-    "content-hash": "d5a0cb597624f7d82796e67a996f7cee",
-=======
     "content-hash": "3288e0b2a614593e0a47989367c4451e",
->>>>>>> Stashed changes
     "packages": [
         {
             "name": "composer/semver",
@@ -1583,19 +1579,17 @@
             "time": "2024-04-12T21:02:21+00:00"
         },
         {
-<<<<<<< Updated upstream
-=======
             "name": "nelmio/api-doc-bundle",
-            "version": "v4.26.1",
+            "version": "v4.26.2",
             "source": {
                 "type": "git",
                 "url": "https://github.com/nelmio/NelmioApiDocBundle.git",
-                "reference": "2af8c5d55d48c488ef1a650b9ef7133e3c583623"
+                "reference": "9379c44da4b4e6ef36a81f3135d3d158838a7c16"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/nelmio/NelmioApiDocBundle/zipball/2af8c5d55d48c488ef1a650b9ef7133e3c583623",
-                "reference": "2af8c5d55d48c488ef1a650b9ef7133e3c583623",
+                "url": "https://api.github.com/repos/nelmio/NelmioApiDocBundle/zipball/9379c44da4b4e6ef36a81f3135d3d158838a7c16",
+                "reference": "9379c44da4b4e6ef36a81f3135d3d158838a7c16",
                 "shasum": ""
             },
             "require": {
@@ -1695,12 +1689,11 @@
             ],
             "support": {
                 "issues": "https://github.com/nelmio/NelmioApiDocBundle/issues",
-                "source": "https://github.com/nelmio/NelmioApiDocBundle/tree/v4.26.1"
+                "source": "https://github.com/nelmio/NelmioApiDocBundle/tree/v4.26.2"
             },
-            "time": "2024-04-20T11:19:38+00:00"
+            "time": "2024-05-29T07:12:15+00:00"
         },
         {
->>>>>>> Stashed changes
             "name": "phpdocumentor/reflection-common",
             "version": "2.2.0",
             "source": {
@@ -7506,8 +7499,6 @@
                 "source": "https://github.com/webmozarts/assert/tree/1.11.0"
             },
             "time": "2022-06-03T18:03:27+00:00"
-<<<<<<< Updated upstream
-=======
         },
         {
             "name": "zircote/swagger-php",
@@ -7589,7 +7580,6 @@
                 "source": "https://github.com/zircote/swagger-php/tree/4.9.1"
             },
             "time": "2024-04-30T22:01:17+00:00"
->>>>>>> Stashed changes
         }
     ],
     "packages-dev": [
